@@ -1,0 +1,16 @@
+[Unit]
+Description=uWSGI Emperor
+After=network.target
+[Service]
+User= www-data
+Group=www-data
+WorkingDirectory=/var/www/spdpaas/src
+Environment='PATH=/var/www/spdpaas/venv/bin'
+ExecStart=/var/www/spdpaas/venv/bin/uwsgi --ini /etc/uwsgi/emperor.ini
+#Restart=always(don't do this, will fail to start service)
+KillSignal=SIGQUIT
+Type=notify
+# dont log to syslog, follow logto # StandardError=syslog
+NotifyAccess=all
+[Install]
+WantedBy=multi-user.target

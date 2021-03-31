@@ -1,3 +1,5 @@
 .DS_Store
 dnmp-master/
+celery-worker/simple_worker/var
 Part 3/
+*.zip

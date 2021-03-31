@@ -4,7 +4,7 @@ from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
 
-app = Celery("sapidoPaaS",broker="redis://root:sapido@192.168.88.71:6379/15")
+app = Celery("sapidoPaaS",broker="redis://root:sapido@172.16.2.55:6379/15")
 
 # @app.task()
 # def longtime_add(x, y):

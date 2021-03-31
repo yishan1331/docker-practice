@@ -294,13 +294,13 @@ def getDbSessionType(dbName="", forRawData="mysql", system=None, driver="pyodbc"
     RedisPassword = "DBREDISPassword"
 
     if forRawData == 'postgres':
-        dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@192.168.88.71:5680/{}".format(dbName)
+        dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@172.16.2.55:5680/{}".format(dbName)
 
     elif forRawData == 'redis':
         try:
             #採用此方式connect無需再特地disconnect，會自動disconnect 
             #not need to do -> dbRedis.connection_pool.disconnect()
-            POOL = redis.ConnectionPool(host="192.168.88.71",\
+            POOL = redis.ConnectionPool(host="127.0.0.1",\
                                         port="6379",\
                                         db=dbName,\
                                         password="sapido")

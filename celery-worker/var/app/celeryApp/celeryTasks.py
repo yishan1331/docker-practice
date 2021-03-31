@@ -56,7 +56,7 @@ class DBTask(Task):
                 from sqlalchemy.engine import create_engine
                 from modules import check_dbconnect_success
                 
-                dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@192.168.88.71:5680/{}".format("sapidoapicount_"+system.lower())
+                dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@172.16.2.55:5680/{}".format("sapidoapicount_"+system.lower())
                 print("@@@@@@dbUri@@@@@@@@")
                 print(dbUri)
                 self._dbEngine = create_engine(dbUri,encoding='utf-8')
@@ -114,6 +114,8 @@ def celery_post_api_count_record(self, threaddata):
             if dbRedis is None:
                 return
 
+            apirecord_hash_num = 10
+
             checkexistedResult = checkexisted_api_count_record_table(sessRaw, metaRaw, dbName, tbName_count, system, dbRedis)
         
             if checkexistedResult:
@@ -123,8 +125,11 @@ def celery_post_api_count_record(self, threaddata):
 
                 with dbRedis.pipeline() as pipe:
                     count = 0
+                    hash_num = 0
                     while True:
                         try:
+                            # print "====start redis pipe while===="
+                            # print self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
                             # 監聽redis api today key 
                             pipe.watch(redis_count_key)
 
@@ -151,17 +156,19 @@ def celery_post_api_count_record(self, threaddata):
                             print(self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::])
                             count += 1
                             print(count)
-                            if count == 10:
+                            if count == 5:
                                 count = 0
-                                if len(redis_count_key.split("_")) == 3:
-                                    redis_count_key += "_#"
-                                    print("~~~redis_count_key~~~~")
-                                    print(redis_count_key)
+
+                                redis_count_key = "_".join(redis_count_key.split("_")[0:3])
+                                if hash_num < apirecord_hash_num:
+                                    hash_num += 1
+                                    redis_count_key += "_"+"#"*hash_num
                                 else:
-                                    redis_count_key = "_".join(redis_count_key.split("_")[0:3])
-                                    print("~~~redis_count_key~~~~")
-                                    print(redis_count_key)
-                                
+                                    hash_num = 0
+
+                                print("@@@@@@@@@@redis_count_key@@@@@@@@@@")
+                                print(redis_count_key)
+
                                 if not dbRedis.exists(redis_count_key):
                                     dbRedis.hmset(redis_count_key,{"success_counts":0,"fail_counts":0,"success_averagetime":0,"upload_time":datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
                                     dbRedis.expire(redis_count_key,88200) #設定過期秒數1天又30分鐘
@@ -172,8 +179,8 @@ def celery_post_api_count_record(self, threaddata):
                             # 因为 redis-py 在执行 WATCH 命令期间，会将流水线与单个连接进行绑定
                             # 所以在执行完 WATCH 命令之后，必须调用 reset() 方法将连接归还给连接池
                             pipe.reset() # 重置管道，为重试做准备
-                    # print("====after redis pipe while====")
-                    # print(self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::])
+                    # print "====after redis pipe while===="
+                    # print self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
 
         except Exception as e:
             print("~~~~err_msg~~~~")

@@ -17,7 +17,12 @@ ENV TZ=Asia/Taipei
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl
+    && apt-get install -y vim-gtk less curl cron
+
+RUN apt-get -y install redis-server
+RUN sed -i '69s/bind 127.0.0.1/bind 0.0.0.0 ::/' /etc/redis/redis.conf #開放遠端連線
+RUN sed -i '79s/timeout 0/timeout 3600/' /etc/redis/redis.conf #修改timeout時間
+RUN sed -i '396s/# requirepass foobared/requirepass sapido/' /etc/redis/redis.conf #修改登入密碼
 
 # RUN groupadd user && useradd --create-home --home-dir /home/user -g user user
 # WORKDIR /home/user
@@ -42,5 +47,9 @@ RUN pip install -r /requirements.txt
 
 WORKDIR /var/app
 
+EXPOSE 6379
+
 # USER user
-CMD celery -A celeryWorker worker -Q L-queue1 --pidfile=/run/celery.pid -l DEBUG --logfile=/var/log/celery/helper.log
+# CMD celery -A celeryWorker worker -Q L-queue1 --pidfile=/run/celery.pid -l DEBUG --logfile=/var/log/celery/helper.log
+# CMD celery -A celeryWorker multi start 10 --pidfile=/run/celery_%n.pid -l DEBUG --logfile=/var/log/celery/%n%I.log -Q L-queue1 -c 1000 -P gevent -O fair
+# CMD ["/bin/bash", "start.sh"]

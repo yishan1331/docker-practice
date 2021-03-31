@@ -14,16 +14,16 @@ services:
     ports:
       - '6379:6379'
 
-  postgres:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_PASSWORD: super
+  # postgres:
+  #   image: postgres
+  #   restart: always
+  #   environment:
+  #     POSTGRES_PASSWORD: super
 
-  simple_worker:
+  worker1:
     build: './simple_worker'
     user: nobody
-    depends_on:
-      - rabbit
-      - flask_app
-      - mongodb_container
+    # depends_on:
+    #   - rabbit
+    #   - flask_app
+    #   - mongodb_container

@@ -1,6 +1,5 @@
 version: "3.7"
 services:
-
   # flask_app:
   #   build: './flask_app'
   #   ports:
@@ -10,9 +9,18 @@ services:
   #     - mongodb_container
 
   redis:
-    image: 'redis:4-alpine'
+    image: redis
     ports:
-      - '6379:6379'
+      - "${REDIS_HOST_PORT}:6379"
+    volumes:
+      - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
+      - ${DATA_DIR}/redis:/data/:rw
+    restart: always
+    entrypoint: ["redis-server", "/etc/redis.conf"]
+    environment:
+      TZ: "$TZ"
+    # networks:
+    #   - default
 
   # postgres:
   #   image: postgres
@@ -21,9 +29,21 @@ services:
   #     POSTGRES_PASSWORD: super
 
   worker1:
-    build: './simple_worker'
-    user: nobody
-    # depends_on:
-    #   - rabbit
-    #   - flask_app
-    #   - mongodb_container
+    build:
+      context: ./services/celery
+      args:
+        TZ: "$TZ"
+    depends_on:
+      - redis
+    # networks:
+    #   - default
+
+  worker2:
+    build:
+      context: ./services/celery
+      args:
+        TZ: "$TZ"
+    depends_on:
+      - redis
+    # networks:
+    #   - default

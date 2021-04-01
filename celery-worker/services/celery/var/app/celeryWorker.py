@@ -36,7 +36,7 @@ config = {
     "celery_broker_ip":"192.168.88.71",
     "celery_broker_port":"6379",
     "celery_broker_pwd":"sapido",
-    "redis_ip":"127.0.0.1",
+    "redis_ip":"redis",
     "redis_port":"6379",
     "redis_pwd":"sapido",
     "postgres_ip":"192.168.88.71",
@@ -50,3 +50,9 @@ app = Celery("sapidoPaaS",
     include=["celeryApp.celeryTasks"])
 app.config_from_object(celeryConfig)
 
+import redis
+POOL = redis.ConnectionPool(host='redis', port=6379, db=15,password="sapido")
+dbRedis = redis.Redis(connection_pool=POOL)
+
+if not dbRedis.exists("apirecord_hash_num"):
+    dbRedis.set("apirecord_hash_num", 10)

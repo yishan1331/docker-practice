@@ -1,49 +1,73 @@
 version: "3.7"
 services:
-  # flask_app:
-  #   build: './flask_app'
-  #   ports:
-  #     - "5000:5000"
-  #   depends_on:
-  #     - rabbit
-  #     - mongodb_container
+    # flask_app:
+    #   build: './flask_app'
+    #   ports:
+    #     - "5000:5000"
+    #   depends_on:
+    #     - rabbit
+    #     - mongodb_container
 
-  redis:
-    image: redis
-    ports:
-      - "${REDIS_HOST_PORT}:6379"
-    volumes:
-      - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
-      - ${DATA_DIR}/redis:/data/:rw
-    restart: always
-    entrypoint: ["redis-server", "/etc/redis.conf"]
-    environment:
-      TZ: "$TZ"
-    # networks:
-    #   - default
+    redis:
+        image: redis
+        ports:
+            - "${REDIS_HOST_PORT}:6379"
+        volumes:
+            - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
+            - ${DATA_DIR}/redis:/data/:rw
+        restart: always
+        entrypoint: ["redis-server", "/etc/redis.conf"]
+        environment:
+            TZ: "$TZ"
+        # networks:
+        #   - default
 
-  # postgres:
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     POSTGRES_PASSWORD: super
+    # postgres:
+    #   image: postgres
+    #   restart: always
+    #   environment:
+    #     POSTGRES_PASSWORD: super
 
-  worker1:
-    build:
-      context: ./services/celery
-      args:
-        TZ: "$TZ"
-    depends_on:
-      - redis
-    # networks:
-    #   - default
+    worker1:
+        build:
+            context: ./services/celery
+            args:
+                TZ: "$TZ"
+        volumes:
+            - ./wait-for-it.sh:/wait-for-it.sh
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "/wait-for-it.sh redis:6379 -t 5 -- celery -A celeryWorker worker --loglevel=error -c 1000 -P gevent -O fair",
+            ]
+        depends_on:
+            - redis
+        links:
+            - redis
+        # environment:
+        #   NODE_ENV: "development"
+        #   REDIS_HOST: "redis"
+        #   REDIS_PORT: 7788
+        # networks:
+        #   - default
 
-  worker2:
-    build:
-      context: ./services/celery
-      args:
-        TZ: "$TZ"
-    depends_on:
-      - redis
-    # networks:
-    #   - default
+    worker2:
+        build:
+            context: ./services/celery
+            args:
+                TZ: "$TZ"
+        volumes:
+            - ./wait-for-it.sh:/wait-for-it.sh
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "/wait-for-it.sh redis:6379 -t 5 -- celery -A celeryWorker worker --loglevel=error -c 1000 -P gevent -O fair",
+            ]
+        depends_on:
+            - redis
+        links:
+            - redis
+        # networks:
+        #   - default

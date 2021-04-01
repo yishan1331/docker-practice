@@ -22,8 +22,6 @@ import subprocess #Yishan 05212020 subprocess 取代 os.popen
 from sqlalchemy import Table
 import resource
 from celery import Task
-# from app import config
-from celeryWorker import config
 #}}}
 
 #=======================================================
@@ -37,48 +35,56 @@ from modules import ConvertData, retrieve_database_exist, create_database, getDb
 __all__ = ('celery_post_api_count_record')
 
 class DBTask(Task):
-    _session = None
-    _sess = None
-    _metadata = None
-    _dbEngine = None
+    _system = None
+    _systemSess = {}
     print("~~~~DBTask~~~~")
 
     def after_return(self, *args, **kwargs):
-        if self._session is not None:
-            self._sess.close()
-            self._session.remove()
-            self._dbEngine.dispose()
+        print("~~~~~after_return~~~~~")
+        print(self._system)
+        print(self._systemSess[self._system])
+        if self._systemSess[self._system] is not None:
+            print("^^^^^^^^^^^^^^^^")
+            self._systemSess[self._system][0].close()
+            self._systemSess[self._system][3].remove()
+            self._systemSess[self._system][2].dispose()
+            print("vvvvvvvvvvvvvvvv")
 
     # @property
     def session(self, system):
         try:
-            if self._session is None:
+            self._system = system
+            print("self._systemSess -> ",self._systemSess)
+            print("system -> ",system)
+
+            # 03172021@Yishan 將不同system的db session存入dict，避免建立新的連接
+            if (not self._systemSess.has_key(self._system)):
                 from sqlalchemy import MetaData
                 from sqlalchemy.orm import scoped_session, sessionmaker
                 from sqlalchemy.engine import create_engine
                 from modules import check_dbconnect_success
                 
-                # dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@172.16.2.55:5680/{}".format("sapidoapicount_"+system.lower())
-                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(config["postgres_user"],config["postgres_pwd"],config["postgres_ip"],config["postgres_port"],"sapidoapicount_"+system.lower())
+                dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@172.16.2.55:5680/{}".format("sapidoapicount_"+system.lower())
                 print("@@@@@@dbUri@@@@@@@@")
                 print(dbUri)
-                self._dbEngine = create_engine(dbUri,encoding='utf-8')
+                _dbEngine = create_engine(dbUri,encoding='utf-8')
                 print("111111111111111")
 
-                self._metadata = MetaData(bind=self._dbEngine)
+                _metadata = MetaData(bind=_dbEngine)
                 print("222222222222222")
-                self._session = scoped_session(sessionmaker(autocommit=False, \
+                _session = scoped_session(sessionmaker(autocommit=False, \
                                             autoflush=False, \
-                                            bind=self._dbEngine))
+                                            bind=_dbEngine))
                 print("333333333333333")
 
-                check_status,check_result = check_dbconnect_success(self._session, system)
+                check_status,check_result = check_dbconnect_success(_session, self._system)
                 print("444444444444444")
                 if not check_status: return None,None,check_result
                 
-                self._sess = self._session()
+                _sess = _session()
+                self._systemSess[self._system] = [_sess,_metadata,_dbEngine,_session]
 
-            return self._sess,self._metadata,self._dbEngine
+            return self._systemSess[self._system]
             
         except Exception as e:
             err_msg = e
@@ -110,14 +116,22 @@ def celery_post_api_count_record(self, threaddata):
     if not retrieve_database_exist(system, dbName=dbName, forRawData="postgres")[0]:
         create_database(system, dbName, forRawData="postgres")
     
-    sessRaw,metaRaw,engineRaw = self.session(system)
+    sessionResult = self.session(system)
+    sessRaw = sessionResult[0]
+    metaRaw = sessionResult[1]
+    engineRaw = sessionResult[2]
+    # sessRaw,metaRaw,engineRaw = self.session(system)
+    # print "&&&&&&&&&&&&&&&&&&&&&&&&"
+    print(sessRaw,metaRaw,engineRaw)
+    # print datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
+    # print "&&&&&&&&&&&&&&&&&&&&&&&&"
     if not sessRaw is None:
         try:
             dbRedis,_,_= getDbSessionType(system="PaaS",dbName=15,forRawData="redis")
             if dbRedis is None:
                 return
 
-            apirecord_hash_num = 10
+            apirecord_hash_num = int(dbRedis.get("apirecord_hash_num"))
 
             checkexistedResult = checkexisted_api_count_record_table(sessRaw, metaRaw, dbName, tbName_count, system, dbRedis)
         
@@ -186,8 +200,8 @@ def celery_post_api_count_record(self, threaddata):
                     # print self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
 
         except Exception as e:
-            print("~~~~err_msg~~~~")
-            print(err_msg)
+            print("~~~~e~~~~")
+            print(e)
 
         finally:
             print_mem()

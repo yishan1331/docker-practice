@@ -1,7 +1,7 @@
 from celery import Celery
 
 # from configuration import celeryConfig
-from configuration.celeryConfig import BaseConfig as celeryConfig
+from celeryConfig import BaseConfig as celeryConfig
 
 def _flask_context_task(app, TaskBase):
     class ContextTask(TaskBase):
@@ -12,10 +12,10 @@ def _flask_context_task(app, TaskBase):
             
     return ContextTask
 
-def make_celery(app):
+def make_celery(app,dicConfig):
     celery = Celery(app.import_name,
-        backend=app.dicConfig.get("celery_result_backend"),
-        broker=app.dicConfig.get("celery_broker"))
+        backend=dicConfig.get("celery_result_backend"),
+        broker=dicConfig.get("celery_broker"))
     celery.config_from_object(celeryConfig)
     TaskBase = celery.Task
     class ContextTask(TaskBase):

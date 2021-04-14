@@ -1,5 +1,7 @@
 .DS_Store
-dnmp-master/
-celery-worker/simple_worker/var
-Part 3/
+.vscode
+# dnmp-master/
+# celery-worker/simple_worker/var
+# original-paas/copy_to_container/www
+# Part 3/
 *.zip

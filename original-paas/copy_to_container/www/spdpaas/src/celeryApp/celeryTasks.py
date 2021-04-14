@@ -16,45 +16,42 @@ Description: for celery tasks
 # System level modules
 #=======================================================
 #{{{
-import os, time, sys
-#wei@02262019
-reload(sys)
-sys.setdefaultencoding('utf-8')
-from datetime import datetime
 import subprocess #Yishan 05212020 subprocess 取代 os.popen
-from sqlalchemy import Table
 import resource
 from celery import Task
+import redis
+from sqlalchemy import *
 #}}}
 
 #=======================================================
 # User level modules
 #=======================================================
 #{{{
-from apiPortal import app, celery
-from configuration.celeryConfig import readConfig
-from modules import ConvertData, retrieve_database_exist, create_database
-from globalvar import SERVERIP, SYSTEMLIST
+from app import *
+#Yishan@05212020 added for common modules
+from app.modules import *
+from .celeryConfig import readConfig
 #}}}
 
-__all__ = ('celery_post_api_count_record', 'celery_trigger_specific_program', 'celery_send_email')
-
 class DBTask(Task):
-    _session = None
-    _sess = None
-    _metadata = None
-    _dbEngine = None
+    # _session = None
+    # _sess = None
+    # _metadata = None
+    # _dbEngine = None
+    _system = None
+    _systemSess = {}
     print "~~~~DBTask~~~~"
 
     def after_return(self, *args, **kwargs):
-        # print "~~~~~after_return~~~~~"
-        # print self._session
-        if self._session is not None:
-            # print "^^^^^^^^^^^^^^^^"
-            self._sess.close()
-            self._session.remove()
-            self._dbEngine.dispose()
-            # print "vvvvvvvvvvvvvvvv"
+        print "~~~~~after_return~~~~~"
+        print self._system
+        print self._systemSess[self._system]
+        if self._systemSess[self._system] is not None:
+            print "^^^^^^^^^^^^^^^^"
+            self._systemSess[self._system][0].close()
+            self._systemSess[self._system][3].remove()
+            self._systemSess[self._system][2].dispose()
+            print "vvvvvvvvvvvvvvvv"
 
     # @property
     def session(self, system):
@@ -62,41 +59,45 @@ class DBTask(Task):
         # print datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
         # print system
         try:
-            # print self._session
-            if self._session is None:
-                from sqlalchemy import MetaData
+            self._system = system
+            print "self._systemSess -> ",self._systemSess
+            print "system -> ",system
+
+            # 03172021@Yishan 將不同system的db session存入dict，避免建立新的連接
+            if (not self._systemSess.has_key(self._system)):
                 from sqlalchemy.orm import scoped_session, sessionmaker
                 from sqlalchemy.engine import create_engine
-                from modules import check_dbconnect_success
                 
                 dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format( \
-                            app.dicConfig.get("DBPOSTGRESUser"),   \
-                            app.dicConfig.get("DBPOSTGRESPassword"),   \
-                            app.dicConfig.get("DBPOSTGRESIp"), \
-                            app.dicConfig.get("DBPOSTGRESPort"),  \
-                            "sapidoapicount_"+system.lower())
+                            dicConfig.get("DBPOSTGRESUser"),   \
+                            dicConfig.get("DBPOSTGRESPassword"),   \
+                            dicConfig.get("DBPOSTGRESIp"), \
+                            dicConfig.get("DBPOSTGRESPort"),  \
+                            "sapidoapicount_"+self._system.lower())
                 print "@@@@@@dbUri@@@@@@@@"
                 print dbUri
-                self._dbEngine = create_engine(dbUri,encoding='utf-8')
+                _dbEngine = create_engine(dbUri,encoding='utf-8')
                 print "111111111111111"
 
-                self._metadata = MetaData(bind=self._dbEngine)
+                _metadata = MetaData(bind=_dbEngine)
                 print "222222222222222"
-                self._session = scoped_session(sessionmaker(autocommit=False, \
+                _session = scoped_session(sessionmaker(autocommit=False, \
                                             autoflush=False, \
-                                            bind=self._dbEngine))
+                                            bind=_dbEngine))
                 print "333333333333333"
 
-                check_status,check_result = check_dbconnect_success(self._session, system)
+                check_status,check_result = check_dbconnect_success(_session, self._system)
                 print "444444444444444"
                 if not check_status: return None,None,check_result
                 
-                self._sess = self._session()
+                _sess = _session()
+                self._systemSess[self._system] = [_sess,_metadata,_dbEngine,_session]
 
-            return self._sess,self._metadata,self._dbEngine
+            return self._systemSess[self._system]
+            # return self._sess,self._metadata,self._dbEngine
             
         except Exception as e:
-            err_msg = app.catch_exception(e,sys.exc_info(),system)
+            err_msg = appPaaS.catch_exception(e,sys.exc_info(),system)
             return None,None,err_msg
 
 def print_mem():
@@ -104,8 +105,6 @@ def print_mem():
 
 @celery.task(base=DBTask, bind=True)
 def celery_post_api_count_record(self, threaddata):
-    from apiPortal import checkexisted_api_count_record_table, create_api_count_record_table
-    import redis
     threaddata = ConvertData().convert(threaddata)
     print "~~~~threaddata~~~~"
     print self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
@@ -120,23 +119,29 @@ def celery_post_api_count_record(self, threaddata):
     apiTimeCost = threaddata[4]
     apicompletiontime = threaddata[5]
 
-    # if system not in SYSTEMLIST[SERVERIP]: return
+    # if system not in globalvar.SYSTEMLIST[globalvar.SERVERIP]: return
     
     tbName_count = "api_"+system.lower()+"_"+time.strftime("%Y%m", time.localtime())
     redis_count_key = "api_"+system.lower()+"_"+time.strftime("%Y%m%d", time.localtime())
     if not retrieve_database_exist(system, dbName=dbName, forRawData="postgres")[0]:
         create_database(system, dbName, forRawData="postgres")
-    
-    sessRaw,metaRaw,engineRaw = self.session(system)
+        
+    sessionResult = self.session(system)
+    sessRaw = sessionResult[0]
+    metaRaw = sessionResult[1]
+    engineRaw = sessionResult[2]
+    # sessRaw,metaRaw,engineRaw = self.session(system)
     # print "&&&&&&&&&&&&&&&&&&&&&&&&"
-    # print sessRaw,metaRaw,engineRaw
+    print sessRaw,metaRaw,engineRaw
     # print datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
     # print "&&&&&&&&&&&&&&&&&&&&&&&&"
     if not sessRaw is None:
         try:
-            dbRedis,_,_= app.getDbSessionType(system="PaaS",dbName=15,forRawData="redis")
+            dbRedis,_,_ = appPaaS.getDbSessionType(system=system,dbName=15,forRawData="redis")
             if dbRedis is None:
                 return
+
+            apirecord_hash_num = int(dbRedis.get("apirecord_hash_num"))
 
             checkexistedResult = checkexisted_api_count_record_table(sessRaw, metaRaw, dbName, tbName_count, system, dbRedis)
         
@@ -147,6 +152,7 @@ def celery_post_api_count_record(self, threaddata):
 
                 with dbRedis.pipeline() as pipe:
                     count = 0
+                    hash_num = 0
                     while True:
                         try:
                             # print "====start redis pipe while===="
@@ -177,17 +183,19 @@ def celery_post_api_count_record(self, threaddata):
                             print self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
                             count += 1
                             print count
-                            if count == 10:
+                            if count == 5:
                                 count = 0
-                                if len(redis_count_key.split("_")) == 3:
-                                    redis_count_key += "_#"
-                                    print "~~~redis_count_key~~~~"
-                                    print redis_count_key
+
+                                redis_count_key = "_".join(redis_count_key.split("_")[0:3])
+                                if hash_num < apirecord_hash_num:
+                                    hash_num += 1
+                                    redis_count_key += "_"+"#"*hash_num
                                 else:
-                                    redis_count_key = "_".join(redis_count_key.split("_")[0:3])
-                                    print "~~~redis_count_key~~~~"
-                                    print redis_count_key
-                                
+                                    hash_num = 0
+
+                                print "@@@@@@@@@@redis_count_key@@@@@@@@@@"
+                                print redis_count_key
+
                                 if not dbRedis.exists(redis_count_key):
                                     dbRedis.hmset(redis_count_key,{"success_counts":0,"fail_counts":0,"success_averagetime":0,"upload_time":datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
                                     dbRedis.expire(redis_count_key,88200) #設定過期秒數1天又30分鐘
@@ -201,26 +209,8 @@ def celery_post_api_count_record(self, threaddata):
                     # print "====after redis pipe while===="
                     # print self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
 
-                # this_api_count_table = Table(tbName_count , metaRaw, autoload=True)
-
-                # if not status:
-                #     failcounts += 1
-                #     updateSql = this_api_count_table.update().values(fail_counts=failcounts,upload_time=apicompletiontime)
-                # else:
-                #     success_totaltime = success_averagetime * successcounts
-                #     success_totaltime += apiTimeCost
-
-                #     successcounts += 1
-                #     averagetime = float('%.3f' % success_totaltime)/successcounts
-                    
-                #     updateSql = "update {tbName_count} set success_counts=(select success_counts+1 from {tbName_count}),\
-                #         success_averagetime=(SELECT CASE WHEN success_counts = 0 THEN round({apiTimeCost}::numeric,3) \
-                #             ELSE round(((success_counts*success_averagetime+{apiTimeCost})/(success_counts+1))::numeric,3) END from {tbName_count}),\
-                #         upload_time='{apicompletiontime}'".format(tbName_count=tbName_count, apiTimeCost=apiTimeCost, apicompletiontime=apicompletiontime)
-                # sessRaw.execute(updateSql)
-
         except Exception as e:
-            err_msg = app.catch_exception(e, sys.exc_info(), system)
+            err_msg = appPaaS.catch_exception(e, sys.exc_info(), system)
             print "~~~~err_msg~~~~"
             print err_msg
 
@@ -275,3 +265,120 @@ def celery_send_email(selfUse,emailData):
     #發送失敗
     else:
         print("[{}] ".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]),"To-do notification email delivery failed")
+
+#=======================================================
+# Definition: 初始設定apirecord的hash numer(apirecord_hash_num)
+# Date: 03302021@Yishan
+#=======================================================
+# {{{def apirecord_hash_num_init()
+def apirecord_hash_num_init():
+    try:
+        dbRedis,_,_ = appPaaS.getDbSessionType(system="PaaS",dbName=15,forRawData="redis")
+        if dbRedis is None:
+            return
+        
+        #若key不存在，直接建立
+        if not dbRedis.exists("apirecord_hash_num"):
+            dbRedis.set("apirecord_hash_num", 10)
+
+    except Exception as e:
+        appPaaS.catch_exception(e, sys.exc_info(), "PaaS")
+
+#=======================================================
+# 建立新的countapitimes Table(年月為單位)
+# Date: Yishan 09272019
+#=======================================================
+# {{{ def create_api_count_record_table(sessRaw, metaRaw, tbName, system, which, dbRedis=None):
+def create_api_count_record_table(sessRaw, metaRaw, tbName, system, which, dbRedis=None):
+    try:
+        if which == "count":
+            if dbRedis is not None:
+                dbRedis.hmset(tbName,{"success_counts":0,"fail_counts":0,"success_averagetime":0,"upload_time":datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+                print "~~~~tbName~~~~"
+                print tbName
+                dbRedis.expire(tbName,88200) #設定過期秒數1天又30分鐘
+            else:
+                new_table = Table(tbName, metaRaw, 
+                    Column("success_counts",Integer),
+                    Column("fail_counts",Integer),
+                    Column("success_averagetime",Float),
+                    Column("upload_time", TIMESTAMP(timezone=False),server_default=func.current_timestamp(6)) 
+                )
+                addData = {"success_counts":0,"fail_counts":0,"success_averagetime":0,"upload_time":datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+        else:
+            new_table = Table(tbName, metaRaw, 
+                Column("method", VARCHAR(10),nullable=False), 
+                Column("apipath", VARCHAR(256),nullable=False), 
+                Column("status", Boolean,nullable=False), 
+                Column("operation_time", Float,nullable=False),
+                Column("completion_time", TIMESTAMP(timezone=False)),
+                Column("upload_time", TIMESTAMP(timezone=False),server_default=func.current_timestamp(6)) 
+            )
+
+        if dbRedis is None:
+            new_table.create()
+            metaRaw.create_all()
+
+            if which == "count":
+                sessRaw.execute(new_table.insert().values(addData))
+                sessRaw.commit()
+        
+    
+    except Exception as e:
+        err_msg = appPaaS.catch_exception(e,sys.exc_info(),system)
+# }}}
+
+#=======================================================
+# 檢查countapitimes Table是否存在
+# Date: Yishan 09272019
+#=======================================================
+#{{{ def checkexisted_api_count_record_table(sessRaw, metaRaw, dbName, tbName_count, system, dbRedis=None):
+def checkexisted_api_count_record_table(sessRaw, metaRaw, dbName, tbName_count, system, dbRedis=None):
+    from sqlalchemy.exc import InvalidRequestError
+    # successcounts = 0
+    # failcounts = 0
+    # success_averagetime = 0
+    tbName_record = tbName_count+"_record"
+
+    try:
+        if dbRedis is not None:
+            redis_api_key = "api_"+system.lower()+"_"+time.strftime("%Y%m%d", time.localtime())
+            if not dbRedis.exists(redis_api_key):
+                create_api_count_record_table(sessRaw, metaRaw, redis_api_key, system, "count", dbRedis)
+
+        try:
+            #Yishan 10182019 check table existed with metaRaw.reflect()
+            metaRaw.reflect(only=[tbName_count])
+        
+        except InvalidRequestError as error:
+            print "~~~~error~~~~"
+            print error
+            if not re.search(r'Could not reflect',str(error)):
+                appPaaS.catch_exception(e,sys.exc_info(),system)
+                return False
+
+            create_api_count_record_table(sessRaw, metaRaw, tbName_count, system, "count")
+        
+        try:
+            #Yishan 10182019 check table existed with metaRaw.reflect()
+            metaRaw.reflect(only=[tbName_record])
+        
+        except InvalidRequestError as error:
+            print "~~~~error~~~~"
+            print error
+            if not re.search(r'Could not reflect',str(error)):
+                appPaaS.catch_exception(e,sys.exc_info(),system)
+                return False
+
+            create_api_count_record_table(sessRaw, metaRaw, tbName_record, system, "record")
+                
+        return True
+    except Exception as e:
+        appPaaS.catch_exception(e,sys.exc_info(),system)
+        return False
+#}}}
+
+__all__ = [
+    'celery_post_api_count_record', 'celery_trigger_specific_program',
+    'celery_send_email', 'apirecord_hash_num_init'
+]

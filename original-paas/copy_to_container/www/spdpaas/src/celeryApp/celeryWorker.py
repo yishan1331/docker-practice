@@ -1,17 +1,17 @@
 from celery import Celery
 
-from configuration.celeryConfig import BaseConfig as celeryConfig
-from configuration.celeryConfig import readConfig
-# from apiPortal import app
+from celeryConfig import BaseConfig as celeryConfig
+from celeryConfig import readConfig
 
 def celery_worker():
+    print "======celery_worker========"
     dicConfig = readConfig()
     celery = Celery("sapidoPaaS",
         backend=dicConfig.get("celery_result_backend"),
         broker=dicConfig.get("celery_broker"),
         include=["celeryApp.celeryTasks"])
     celery.config_from_object(celeryConfig)
-    print "======celery_worker========"
+    print "======celery_worker end========"
     print celery
     return celery
 
@@ -25,7 +25,7 @@ celery = celery_worker()
 # def init_worker(**kwargs):
 #     global db_conn
 #     print('Initializing database connection for worker.')
-#     DbSessionRaw,metaRaw,engineRaw = app.getDbSessionType(dbName=dbName, forRawData="postgres", system=system)
+#     DbSessionRaw,metaRaw,engineRaw = appPaaS.getDbSessionType(dbName=dbName, forRawData="postgres", system=system)
 
 
 #     db_conn = db.connect(DB_CONNECT_STRING)
@@ -39,3 +39,7 @@ celery = celery_worker()
 #         db_conn.close()
 
 celery.start()
+
+import apiPortal
+
+__all__ = ['celery']

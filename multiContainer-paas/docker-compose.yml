@@ -1,0 +1,93 @@
+version: "3.7"
+services:
+    nginx:
+        image: nginx
+        ports:
+            - "${NGINX_HTTP_HOST_PORT}:80"
+            - "${NGINX_HTTPS_HOST_PORT}:443"
+        volumes:
+            - ${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
+            - ${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
+            - ${DATA_DIR}/nginx:/var/www/html:rw
+            - ${NGINX_LOG_DIR}:/var/log/nginx/:rw
+
+            # - ${NGINX_SSL_CERTIFICATE_DIR}:/ssl:rw
+            # - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:ro
+            # - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:ro
+
+        restart: always
+        environment:
+            TZ: "$TZ"
+
+    redis:
+        image: redis
+        ports:
+            - "${REDIS_HOST_PORT}:6379"
+        volumes:
+            - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
+            - ${DATA_DIR}/redis:/data/:rw
+        restart: always
+        entrypoint: ["redis-server", "/etc/redis.conf"]
+        environment:
+            TZ: "$TZ"
+
+    postgres:
+        image: postgres
+        restart: always
+        volumes:
+            - ./initdb.d:/docker-entrypoint-initdb.d
+        environment:
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    worker1:
+        build:
+            context: ./services/celery
+            args:
+                TZ: "$TZ"
+        volumes:
+            - ./wait-for-it.sh:/wait-for-it.sh
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "/wait-for-it.sh redis:6379 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/celery.pid --loglevel=debug --logfile=/var/log/celery/celery.log -c 1000 -P gevent -O fair",
+            ]
+        depends_on:
+            - redis
+        links:
+            - redis
+            - postgres
+
+    worker2:
+        build:
+            context: ./services/celery
+            args:
+                TZ: "$TZ"
+        volumes:
+            - ./wait-for-it.sh:/wait-for-it.sh
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "/wait-for-it.sh redis:6379 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/celery.pid --loglevel=debug --logfile=/var/log/celery/celery.log -c 1000 -P gevent -O fair",
+            ]
+        depends_on:
+            - redis
+        links:
+            - redis
+            - postgres
+    
+    flask_app:
+        build:
+            context: ./services/flask
+            args:
+                TZ: "$TZ"
+        ports:
+            - "3687:3687"
+        volumes:
+            - ${DATA_DIR}/flask:/var/www/:rw
+        environment:
+            TZ: "$TZ"
+        depends_on:
+            - nginx
+            - redis

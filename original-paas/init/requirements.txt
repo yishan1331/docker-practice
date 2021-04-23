@@ -53,8 +53,9 @@ pycrypto==2.6.1
 pylibmc==1.6.0
 # pymongo==3.8.0
 PyMySQL==0.7.11
-# pyodbc==4.0.30
+pyodbc==4.0.30
 pyOpenSSL==19.0.0
+pymssql==2.1.4
 pyrsistent==0.15.2
 python-engineio==3.13.2
 python-socketio==4.6.0

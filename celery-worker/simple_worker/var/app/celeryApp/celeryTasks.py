@@ -28,7 +28,7 @@ from celery import Task
 # User level modules
 #=======================================================
 #{{{
-from celeryWorker import app
+from celeryWorker import app, dicConfig
 from modules import ConvertData, retrieve_database_exist, create_database, getDbSessionType
 #}}}
 
@@ -56,7 +56,7 @@ class DBTask(Task):
                 from sqlalchemy.engine import create_engine
                 from modules import check_dbconnect_success
                 
-                dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@172.16.2.55:5680/{}".format("sapidoapicount_"+system.lower())
+                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(dicConfig.get("postgres_user"),dicConfig.get("postgres_pwd"),dicConfig.get("postgres_ip"),dicConfig.get("postgres_port"),"sapidoapicount_"+system.lower())
                 print("@@@@@@dbUri@@@@@@@@")
                 print(dbUri)
                 self._dbEngine = create_engine(dbUri,encoding='utf-8')

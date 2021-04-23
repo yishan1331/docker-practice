@@ -4,4 +4,7 @@
 # celery-worker/simple_worker/var
 # original-paas/copy_to_container/www
 # Part 3/
+multiContainer-paas/data
+multiContainer-paas/services/flask/www/spdpaas/src
+**/log
 *.zip

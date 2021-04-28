@@ -17,18 +17,7 @@ config = {
     "postgres_user":CONFIG.get('postgres', 'user'),
     "postgres_pwd":CONFIG.get('postgres', 'password')
 }
-
-# config = {
-#     "celery_broker_ip":"192.168.88.71",
-#     "celery_broker_port":"6379",
-#     "celery_broker_pwd":"sapido",
-#     "redis_ip":"redis",
-#     "redis_port":"6379",
-#     "redis_pwd":"sapido",
-#     "postgres_ip":"192.168.88.71",
-#     "postgres_port":"5680",
-#     "postgres_user":"sapidopostgres",
-#     "postgres_pwd":"Touspourun_3M"
-# }
+print "##########config#########"
+print config
 
 __all__ = ['config']

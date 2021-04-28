@@ -296,7 +296,6 @@ def getDbSessionType(dbName="", forRawData="mysql", system=None, driver="pyodbc"
     RedisPassword = "DBREDISPassword"
 
     if forRawData == 'postgres':
-        # dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@172.16.2.55:5680/{}".format(dbName)
         dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(config["postgres_user"],config["postgres_pwd"],config["postgres_ip"],config["postgres_port"],dbName)
 
     elif forRawData == 'redis':

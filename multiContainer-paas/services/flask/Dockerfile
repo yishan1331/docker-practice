@@ -35,4 +35,4 @@ RUN chown -R www-data:www-data /var/www/spdpaas
 WORKDIR /var/www/spdpaas
 RUN rm -R Authlib-0.14.3 Authlib-0.14.3.tar.gz
 
-CMD ["uwsgi","-i","spdpaas_uwsgi.ini"]
+# CMD ["uwsgi","-i","spdpaas_uwsgi.ini"]

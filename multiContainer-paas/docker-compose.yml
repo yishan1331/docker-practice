@@ -9,6 +9,7 @@ services:
                 PHP_EXTENSIONS: ${PHP_EXTENSIONS}
                 CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
                 TZ: "$TZ"
+        container_name: php
         volumes:
             - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
             - ${PWD}/${SERVICES_DIR}/${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
@@ -21,6 +22,7 @@ services:
 
     nginx:
         image: nginx
+        container_name: nginx_web
         ports:
             - ${NGINX_HTTP_HOST_PORT}:80
             - ${NGINX_HTTPS_HOST_PORT}:443
@@ -48,6 +50,7 @@ services:
     
     nginx_api:
         image: nginx
+        container_name: nginx_api
         ports:
             - ${NGINX_UWASI_HOST_PORT}:3687
         volumes:
@@ -55,7 +58,7 @@ services:
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/api:/var/log/nginx/:rw
 
-            # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}/spdpaas_uwsgi.sock:/run/uwsgi/spdpaas_uwsgi.sock
+            - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/run/uwsgi/
             # - ${DATA_DIR}/certbot/conf:/etc/letsencrypt
             # - ${DATA_DIR}/certbot/var:/var/lib/letsencrypt
             - ${PWD}/${SERVICES_DIR}/${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
@@ -74,20 +77,25 @@ services:
             context: ${SERVICES_DIR}/flask
             args:
                 TZ: "$TZ"
+        container_name: flask_app
         user: www-data
-        ports:
-            - "3688"
+        # ports:
+        #     - "3688"
+        # expose:
+        #     - ${FLASK_PORT}
         volumes:
-            # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/tmp/spdpaas_uwsgi.sock:ro
-            - ${PWD}/${DATA_DIR}/${UWSGI_LOG_DIR}:/var/log/uwsgi/:rw
-        # command:
-        #     [
-        #         "uwsgi",
-        #         "--ini",
-        #         "/var/www/spdpaas/spdpaas_uwsgi.ini",
-        #     ]
+            - ./wait-for-it.sh:/wait-for-it.sh
+            - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
+            # - ${PWD}/${DATA_DIR}/${UWSGI_LOG_DIR}:/var/log/uwsgi/:rw
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "/wait-for-it.sh mysql:3306 postgres:5432 redis:6379 -t 5 -- uwsgi -i spdpaas_uwsgi.ini",
+            ]
         sysctls:
             - net.core.somaxconn=32678
+        restart: always
         environment:
             TZ: "$TZ"
         depends_on:
@@ -110,8 +118,11 @@ services:
 
     redis:
         image: redis
+        container_name: redis
         ports:
             - ${REDIS_HOST_PORT}:6379
+        # expose:
+        #     - ${REDIS_HOST_PORT}
         volumes:
             - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
             - ${PWD}/${DATA_DIR}/redis:/data/:rw
@@ -122,54 +133,64 @@ services:
 
     postgres:
         image: postgres
-        restart: always
-        ports:
-            - ${POSTGRES_HOST_PORT}:5432
+        container_name: postgres
+        # ports:
+            # - ${POSTGRES_HOST_PORT}:5432
+        expose:
+            - ${POSTGRES_HOST_PORT}
         volumes:
             - ${POSTGRES_CONF_FILE}:/etc/postgresql/postgresql.conf:ro
             - ${POSTGRES_HBA_CONF_FILE}:/etc/postgresql/pg_hba.conf:ro
             - ${PWD}/${SERVICES_DIR}/postgres/initdb.d:/docker-entrypoint-initdb.d
             - ${PWD}/${DATA_DIR}/postgres:/var/lib/postgresql/data:rw
+        restart: always
         environment:
             POSTGRES_USER: ${POSTGRES_USER}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             POSTGRES_DB: ${POSTGRES_DB}
-
+                
     mysql:
         image: mariadb:${MARIADB_VERSION}
-        ports:
-            - ${MYSQL_HOST_PORT}:3306
+        container_name: mysql
+        # ports:
+        #     - ${MYSQL_HOST_PORT}:3306
+        expose:
+            - ${MYSQL_HOST_PORT}
         volumes:
             - ${MYSQL_CONF_FILE}:/etc/mysql/conf.d/:ro
             - ${PWD}/${DATA_DIR}/mysql:/var/lib/mysql/:rw
+            - ${PWD}/${SERVICES_DIR}/mysql/initdb.d:/docker-entrypoint-initdb.d
         restart: always
-        networks:
-            - default
         environment:
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-            MYSQL_USER: ${MYSQL_USER}
-            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            # MYSQL_USER: ${MYSQL_USER}
+            # MYSQL_PASSWORD: ${MYSQL_PASSWORD}
             TZ: "$TZ"
 
-    # worker1:
-    #     build:
-    #         context: ${SERVICES_DIR}/celery
-    #         args:
-    #             TZ: "$TZ"
-    #     volumes:
-    #         - ./wait-for-it.sh:/wait-for-it.sh
-    #         - ${DATA_DIR}/${CELERY_LOG_DIR}:/var/log/celery/:rw
-    #     command:
-    #         [
-    #             "/bin/sh",
-    #             "-c",
-    #             "/wait-for-it.sh redis:6379 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/worker1.pid --loglevel=debug --logfile=/var/log/celery/worker1.log -c 1000 -P gevent -O fair",
-    #         ]
-    #     depends_on:
-    #         - redis
-    #     links:
-    #         - redis
-    #         - postgres
+    celeryworker:
+        build:
+            context: ${PWD}/${SERVICES_DIR}/celery
+            args:
+                TZ: "$TZ"
+        container_name: celeryworker
+        volumes:
+            - ./wait-for-it.sh:/wait-for-it.sh
+            - ${PWD}/${DATA_DIR}/${CELERY_LOG_DIR}:/var/log/celery/:rw
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "/wait-for-it.sh redis:6379 postgres:5432 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/worker.pid --loglevel=debug --logfile=/var/log/celery/worker.log -c 1000 -P gevent -O fair",
+            ]
+        restart: always
+        environment:
+            TZ: "$TZ"
+        depends_on:
+            - redis
+            - postgres
+        links:
+            - redis
+            - postgres
 
     # worker2:
     #     build:

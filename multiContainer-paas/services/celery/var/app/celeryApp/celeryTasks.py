@@ -66,7 +66,6 @@ class DBTask(Task):
                 from modules import check_dbconnect_success
                 
                 dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(config["postgres_user"],config["postgres_pwd"],config["postgres_ip"],config["postgres_port"],"sapidoapicount_"+system.lower())
-                # dbUri = "postgresql+psycopg2://sapidopostgres:Touspourun_3M@172.16.2.55:5680/{}".format("sapidoapicount_"+system.lower())
                 print("@@@@@@dbUri@@@@@@@@")
                 print(dbUri)
                 _dbEngine = create_engine(dbUri,encoding='utf-8')

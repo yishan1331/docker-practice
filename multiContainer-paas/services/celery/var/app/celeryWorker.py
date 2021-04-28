@@ -18,7 +18,7 @@ app = Celery("sapidoPaaS",
 app.config_from_object(celeryConfig)
 
 import redis
-POOL = redis.ConnectionPool(host='redis', port=6379, db=15,password="sapido")
+POOL = redis.ConnectionPool(host=config["celery_broker_ip"], port=config["celery_broker_port"], db=15, password=config["celery_broker_pwd"])
 dbRedis = redis.Redis(connection_pool=POOL)
 
 if not dbRedis.exists("apirecord_hash_num"):

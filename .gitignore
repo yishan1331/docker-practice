@@ -6,5 +6,7 @@
 # Part 3/
 multiContainer-paas/data
 multiContainer-paas/services/flask/www/spdpaas/src
+**/initdb.d
+*.sql
 **/log
 *.zip

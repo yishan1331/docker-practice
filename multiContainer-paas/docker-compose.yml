@@ -54,22 +54,30 @@ services:
         ports:
             - ${NGINX_UWASI_HOST_PORT}:3687
         volumes:
-            - ${PWD}/${SERVICES_DIR}/${NGINX_API_CONFD_DIR}:/etc/nginx/conf.d/:rw
+            - ${PWD}/${SERVICES_DIR}/${NGINX_API_CONFD_DIR}:/etc/nginx/templates
+            # - ${PWD}/${SERVICES_DIR}/${NGINX_API_CONFD_DIR}:/etc/nginx/conf.d/:rw
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/api:/var/log/nginx/:rw
 
-            - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/run/uwsgi/
             # - ${DATA_DIR}/certbot/conf:/etc/letsencrypt
             # - ${DATA_DIR}/certbot/var:/var/lib/letsencrypt
             - ${PWD}/${SERVICES_DIR}/${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
             
+            # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/run/uwsgi/
+            # - paas-uwsgi-sock:/run/uwsgi/
+            - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
+
             # - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:ro
             # - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:ro
 
         restart: always
         environment:
             TZ: "$TZ"
+            # - UWSGI_PORT=${FLASK_PORT}
+            UWSGI_PORT: ${FLASK_PORT}
         depends_on:
+            - flask_app
+        links:
             - flask_app
     
     flask_app:
@@ -80,13 +88,17 @@ services:
         container_name: flask_app
         user: www-data
         # ports:
-        #     - "3688"
-        # expose:
-        #     - ${FLASK_PORT}
+        #     - 3688:3688
+        expose:
+            - ${FLASK_PORT}
         volumes:
             - ./wait-for-it.sh:/wait-for-it.sh
-            - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
             # - ${PWD}/${DATA_DIR}/${UWSGI_LOG_DIR}:/var/log/uwsgi/:rw
+            # - ${PWD}/${DATA_DIR}/${FLASK_LOG_DIR}:/var/www/spdpaas/log/:ro
+
+            # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
+            # - paas-uwsgi-sock:/var/www/spdpaas/run/
+            - paas-data:/var/www/spdpaas/src/
         command:
             [
                 "/bin/sh",
@@ -98,6 +110,7 @@ services:
         restart: always
         environment:
             TZ: "$TZ"
+            UWSGI_PORT: ${FLASK_PORT}
         depends_on:
             - redis
             - postgres
@@ -212,3 +225,8 @@ services:
     #         - redis
     #         - postgres
 
+volumes:
+    paas-data:
+        # external: true
+        # name: paas-data
+    # paas-uwsgi-sock:

@@ -4,7 +4,7 @@ LABEL maintainer="yishanjob13@gmail.com"
 ARG TZ
 
 # layer caching for faster builds
-COPY requirements.txt /
+COPY ./init /init
 COPY www /var/www
 
 RUN apt-get -y update \
@@ -19,7 +19,7 @@ RUN apt-get install -y gcc g++ zlib1g-dev make\
 RUN apt-get install -y unixodbc-dev python-setuptools
 
 RUN pip install setuptools==44.0.0
-RUN pip install -r /requirements.txt
+RUN pip install -r /init/requirements.txt
 
 RUN openssl enc -aes-128-cbc -in /var/www/spdpaas/config/constants.conf -out /var/www/spdpaas/config/encconstants.conf -pass pass:sapidotest2019
 RUN mkdir /var/log/uwsgi
@@ -34,5 +34,9 @@ RUN python setup.py install
 RUN chown -R www-data:www-data /var/www/spdpaas
 WORKDIR /var/www/spdpaas
 RUN rm -R Authlib-0.14.3 Authlib-0.14.3.tar.gz
+
+COPY ./uwsgi /etc/logrotate.d/
+RUN chmod +x /init/uwsgi_logrotate.sh
+RUN /bin/bash /init/uwsgi_logrotate.sh
 
 # CMD ["uwsgi","-i","spdpaas_uwsgi.ini"]

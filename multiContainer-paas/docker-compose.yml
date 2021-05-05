@@ -11,13 +11,16 @@ services:
                 TZ: "$TZ"
         container_name: php
         volumes:
-            - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
             - ${PWD}/${SERVICES_DIR}/${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
             # php-fpm 的配置
             - ${PWD}/${SERVICES_DIR}/${PHP_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/zz-docker.conf:rw
             # 挂载宿主机 socket 目录，因为 nginx 服务也需要访问
             - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
             - ${PWD}/${DATA_DIR}/${PHP_LOG_DIR}:/var/log/php
+
+            # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
+            # - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
+            - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
         restart: always
 
     nginx:
@@ -29,7 +32,7 @@ services:
         volumes:
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
-            - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
+            # - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
 
             # link php-fpm sock
@@ -38,6 +41,8 @@ services:
             # - ${DATA_DIR}/certbot/conf:/etc/letsencrypt
             # - ${DATA_DIR}/certbot/var:/var/lib/letsencrypt
             - ${PWD}/${SERVICES_DIR}/${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
+
+            # - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
             
             # - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:ro
             # - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:ro
@@ -65,10 +70,13 @@ services:
             
             # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/run/uwsgi/
             # - paas-uwsgi-sock:/run/uwsgi/
-            - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
 
             # - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:ro
             # - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:ro
+
+            # link php-fpm sock
+            - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
+            - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
 
         restart: always
         environment:

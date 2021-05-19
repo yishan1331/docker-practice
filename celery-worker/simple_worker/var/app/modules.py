@@ -101,7 +101,7 @@ def check_dbconnect_success(sess, system):
 # Date: 06092020@Yishan
 #=======================================================
 # {{{ def retrieve_database_exist(dbName)
-def retrieve_database_exist(system, dbName="", forRawData="mysql"):
+def retrieve_database_exist(system, dicConfig, dbName="", forRawData="mysql"):
     """
     檢查資料庫是否存在
 
@@ -116,7 +116,7 @@ def retrieve_database_exist(system, dbName="", forRawData="mysql"):
     existed = True
     err_msg = "ok"
     try:
-        DbSession,metadata,engine = getDbSessionType(dbName=dbName, forRawData=forRawData, system=system)
+        DbSession,metadata,engine = getDbSessionType(dicConfig, dbName=dbName, forRawData=forRawData, system=system)
         if DbSession is None:
             existed = False
             err_msg = engine
@@ -135,7 +135,7 @@ def retrieve_database_exist(system, dbName="", forRawData="mysql"):
 # Date: 06092020@Yishan
 #=======================================================
 # {{{ def create_database(dbName)
-def create_database(system, dbName, forRawData="postgres"):
+def create_database(system, dbName, dicConfig, forRawData="postgres"):
     status = True
     if forRawData != "postgres":
         return "Only PostgreSQL DataBase can create new database"
@@ -146,7 +146,7 @@ def create_database(system, dbName, forRawData="postgres"):
         else:
             default_dbName = dbName
             
-        DbSession,_,engine = getDbSessionType(dbName=default_dbName,forRawData=forRawData,system=system)
+        DbSession,_,engine = getDbSessionType(dicConfig, dbName=default_dbName,forRawData=forRawData,system=system)
         print("~~~~~~~~~~")
         print(DbSession)
         print(engine)
@@ -280,7 +280,7 @@ def checkexisted_api_count_record_table(sessRaw, metaRaw, dbName, tbName_count, 
 # DB Session Generation process  
 #=======================================================
 # {{{ def getDbSessionType()
-def getDbSessionType(dbName="", forRawData="mysql", system=None, driver="pyodbc", echo=False):
+def getDbSessionType(dicConfig, dbName="", forRawData="mysql", system=None, driver="pyodbc", echo=False):
     if system is None: return None,None,"No system"
     #POSTGRES
     PostgresqlUser = "DBPOSTGRESUser"

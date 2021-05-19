@@ -104,13 +104,13 @@ def celery_post_api_count_record(self, threaddata):
 
     tbName_count = "api_"+system.lower()+"_"+time.strftime("%Y%m", time.localtime())
     redis_count_key = "api_"+system.lower()+"_"+time.strftime("%Y%m%d", time.localtime())
-    if not retrieve_database_exist(system, dbName=dbName, forRawData="postgres")[0]:
-        create_database(system, dbName, forRawData="postgres")
+    if not retrieve_database_exist(system, dicConfig, dbName=dbName, forRawData="postgres")[0]:
+        create_database(system, dbName, dicConfig, forRawData="postgres")
     
     sessRaw,metaRaw,engineRaw = self.session(system)
     if not sessRaw is None:
         try:
-            dbRedis,_,_= getDbSessionType(system="PaaS",dbName=15,forRawData="redis")
+            dbRedis,_,_= getDbSessionType(dicConfig, system="PaaS",dbName=15,forRawData="redis")
             if dbRedis is None:
                 return
 

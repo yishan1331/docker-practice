@@ -2,6 +2,7 @@
 import os
 import redis
 import time
+import ConfigParser
 from datetime import datetime, date, timedelta
 
 def _readConfig():
@@ -35,7 +36,7 @@ def _readConfig():
 
 dicConfig = _readConfig()
 
-POOL = redis.ConnectionPool(host='{}'.format(dicConfig.get("redis_ip")), port="{}".dicConfig.get("redis_port")), db=15,password="{}".dicConfig.get("redis_pwd")))
+POOL = redis.ConnectionPool(host='{}'.format(dicConfig.get("redis_ip")), port="{}".format(dicConfig.get("redis_port")), db=15,password="{}".format(dicConfig.get("redis_pwd")))
 
 dbRedis = redis.Redis(connection_pool=POOL)
 

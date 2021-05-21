@@ -1,0 +1,4 @@
+* * * * * php /var/www/html/mes_modules/mes_timer/machine_on_off_hist.php
+0 8 * * * php /var/www/html/mes_modules/mes_timer/device_reset.php
+2 8 * * * php /var/www/html/mes_modules/mes_timer/machine_status_sum.php
+2 8 */2 * * rm /var/www/html/mes_modules/newfile.txt

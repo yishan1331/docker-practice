@@ -18,6 +18,8 @@ RUN apt-get -y update \
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root
 
+RUN mkdir /var/www/html/api /var/www/html/web
+
 COPY ${API_HTML} /var/www/html/api
 COPY ${WEB_HTML} /var/www/html/web
 COPY ${PAAS_DASHBOARD} /var/www/spdpaas/src/dashboard

@@ -21,6 +21,7 @@ services:
             # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
             - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
             - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
+        entrypoint: "./crons.sh"
         restart: always
 
     nginx:

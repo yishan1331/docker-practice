@@ -17,4 +17,4 @@ RUN chown root:crontab /var/spool/cron/crontabs/root
 
 WORKDIR /var/www
 
-CMD service cron start
+# CMD service cron start

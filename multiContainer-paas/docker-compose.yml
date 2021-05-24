@@ -24,11 +24,11 @@ services:
         restart: always
 
     nginx:
-        build:
-            context: ${SERVICES_DIR}/nginx
-            args:
-                TZ: "$TZ"
-        # image: nginx
+        # build:
+        #     context: ${SERVICES_DIR}/nginx
+        #     args:
+        #         TZ: "$TZ"
+        image: nginx
         container_name: nginx_web
         ports:
             - ${NGINX_HTTP_HOST_PORT}:80

@@ -3,8 +3,6 @@ FROM ${PHP_VERSION}
 
 ARG TZ
 ARG PHP_EXTENSIONS
-ARG HTML
-ARG PAAS_DASHBOARD
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
@@ -16,9 +14,6 @@ RUN apt-get -y update \
 
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root
-
-COPY ${HTML} /var/www/html
-COPY ${PAAS_DASHBOARD} /var/www/spdpaas/src/dashboard
 
 RUN touch /var/log/cron.log
 

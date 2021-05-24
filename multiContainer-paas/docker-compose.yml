@@ -23,7 +23,7 @@ services:
             - html:/var/www/html:rw
             # - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
             - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
-        entrypoint: "./crons.sh"
+        # entrypoint: "./crons.sh"
         restart: always
 
     nginx:

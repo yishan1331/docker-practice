@@ -19,8 +19,10 @@ services:
             - ${PWD}/${DATA_DIR}/${PHP_LOG_DIR}:/var/log/php
 
             # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
-            - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
-            - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
+            # - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
+            - html:/var/www/html:rw
+            # - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
+            - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
         entrypoint: "./crons.sh"
         restart: always
 
@@ -37,7 +39,8 @@ services:
         volumes:
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
-            - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
+            # - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
+            - html:/var/www/html:rw
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
 
             # link php-fpm sock
@@ -80,7 +83,8 @@ services:
 
             # link php-fpm sock
             - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
-            - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
+            # - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
+            - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
 
         restart: always
         environment:
@@ -242,3 +246,5 @@ volumes:
         # external: true
         # name: paas-data
     # paas-uwsgi-sock:
+    html:
+    paas-dashboard:

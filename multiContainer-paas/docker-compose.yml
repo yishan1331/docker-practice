@@ -9,8 +9,7 @@ services:
                 PHP_EXTENSIONS: ${PHP_EXTENSIONS}
                 CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
                 TZ: "$TZ"
-                API_HTML: ${PWD}/${SERVICES_DIR}/${NGINX_API_HTML_DIR}
-                WEB_HTML: ${PWD}/${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}
+                HTML: ${PWD}/${SERVICES_DIR}/${NGINX_HTML_DIR}
                 PAAS_DASHBOARD: ${PWD}/${SERVICES_DIR}/${DASHBOARD_DIR}
         container_name: php
         volumes:
@@ -35,7 +34,7 @@ services:
             context: ${SERVICES_DIR}/nginx/web
             args:
                 TZ: "$TZ"
-                WEB_HTML: ${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}
+                WEB_HTML: ${SERVICES_DIR}/${NGINX_HTML_DIR}/web
         # image: nginx
         container_name: nginx_web
         ports:

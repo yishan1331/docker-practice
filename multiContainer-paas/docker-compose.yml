@@ -9,9 +9,9 @@ services:
                 PHP_EXTENSIONS: ${PHP_EXTENSIONS}
                 CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
                 TZ: "$TZ"
-                API-HTML: /${SERVICES_DIR}/${NGINX_API_HTML_DIR}
-                WEB-HTML: /${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}
-                PAAS-DASHBOARD: /${SERVICES_DIR}/${DASHBOARD_DIR}
+                API_HTML: /${SERVICES_DIR}/${NGINX_API_HTML_DIR}
+                WEB_HTML: /${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}
+                PAAS_DASHBOARD: /${SERVICES_DIR}/${DASHBOARD_DIR}
         container_name: php
         volumes:
             - ${PWD}/${SERVICES_DIR}/${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
@@ -32,10 +32,10 @@ services:
 
     nginx:
         build:
-            context: ${SERVICES_DIR}/nginx
+            context: ${SERVICES_DIR}/nginx/web
             args:
                 TZ: "$TZ"
-                WEB-HTML: /${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}
+                WEB_HTML: /${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}
         # image: nginx
         container_name: nginx_web
         ports:
@@ -70,7 +70,7 @@ services:
             context: ${SERVICES_DIR}/nginx/api
             args:
                 TZ: "$TZ"
-                PAAS-DASHBOARD: /${SERVICES_DIR}/${DASHBOARD_DIR}
+                PAAS_DASHBOARD: /${SERVICES_DIR}/${DASHBOARD_DIR}
         # image: nginx
         container_name: nginx_api
         ports:

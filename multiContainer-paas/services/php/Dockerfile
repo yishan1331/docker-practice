@@ -3,7 +3,8 @@ FROM ${PHP_VERSION}
 
 ARG TZ
 ARG PHP_EXTENSIONS
-ARG HTML
+ARG API-HTML
+ARG WEB-HTML
 ARG PAAS-DASHBOARD
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
@@ -16,7 +17,11 @@ RUN apt-get -y update \
 
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root
-COPY ${HTML} /var/www/html
+RUN echo ${API-HTML}
+COPY ${API-HTML} /var/www/html/api
+RUN echo ${WEB-HTML}
+COPY ${WEB-HTML} /var/www/html/web
+RUN echo ${PAAS-DASHBOARD}
 COPY ${PAAS-DASHBOARD} /var/www/spdpaas/src/dashboard
 
 RUN touch /var/log/cron.log

@@ -9,8 +9,9 @@ services:
                 PHP_EXTENSIONS: ${PHP_EXTENSIONS}
                 CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
                 TZ: "$TZ"
-                HTML: ${PWD}/${DATA_DIR}/html
-                PAAS-DASHBOARD: ${PWD}/${DATA_DIR}/dashboard
+                API-HTML: /${SERVICES_DIR}/${NGINX_API_HTML_DIR}}
+                WEB-HTML: /${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}}
+                PAAS-DASHBOARD: /${SERVICES_DIR}/${DASHBOARD_DIR}
         container_name: php
         volumes:
             - ${PWD}/${SERVICES_DIR}/${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
@@ -22,18 +23,20 @@ services:
 
             # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
             # - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
-            - html:/var/www/html:rw
+            - api-html:/var/www/html/api:rw
+            - web-html:/var/www/html/web:rw
             # - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
             - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
         # entrypoint: "./crons.sh"
         restart: always
 
     nginx:
-        # build:
-        #     context: ${SERVICES_DIR}/nginx
-        #     args:
-        #         TZ: "$TZ"
-        image: nginx
+        build:
+            context: ${SERVICES_DIR}/nginx
+            args:
+                TZ: "$TZ"
+                WEB-HTML: /${SERVICES_DIR}/${NGINX_WEB_HTML_DIR}}
+        # image: nginx
         container_name: nginx_web
         ports:
             - ${NGINX_HTTP_HOST_PORT}:80
@@ -42,7 +45,7 @@ services:
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
             # - ${PWD}/${DATA_DIR}/html:/var/www/html:rw
-            - html:/var/www/html:rw
+            - web-html:/var/www/html:rw
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
 
             # link php-fpm sock
@@ -67,7 +70,7 @@ services:
             context: ${SERVICES_DIR}/nginx/api
             args:
                 TZ: "$TZ"
-                PAAS-DASHBOARD: ${PWD}/${DATA_DIR}/dashboard
+                PAAS-DASHBOARD: /${SERVICES_DIR}/${DASHBOARD_DIR}
         # image: nginx
         container_name: nginx_api
         ports:
@@ -253,5 +256,6 @@ volumes:
         # external: true
         # name: paas-data
     # paas-uwsgi-sock:
-    html:
+    web-html:
+    api-html:
     paas-dashboard:

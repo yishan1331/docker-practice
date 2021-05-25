@@ -9,14 +9,14 @@ ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/do
 RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
     install-php-extensions ${PHP_EXTENSIONS}
 
-RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl cron rsyslog
+# RUN apt-get -y update \
+#     && apt-get install -y vim-gtk less curl cron rsyslog
 
-COPY var /var
-RUN chown root:crontab /var/spool/cron/crontabs/root
+# COPY var /var
+# RUN chown root:crontab /var/spool/cron/crontabs/root
 
-RUN touch /var/log/cron.log
+# RUN touch /var/log/cron.log
 
 WORKDIR /var/www
 
-CMD service cron start && tail -f /var/log/cron.log
+# CMD service cron start && tail -f /var/log/cron.log

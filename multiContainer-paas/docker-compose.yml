@@ -19,11 +19,13 @@ services:
             - ${PWD}/${DATA_DIR}/${PHP_LOG_DIR}:/var/log/php
 
             # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
-            # - ${PWD}/${SERVICES_DIR}/nginx/html:/var/www/html:rw
-            - api-html:/var/www/html/api:rw
-            - web-html:/var/www/html/web:rw
-            # - ${PWD}/${SERVICES_DIR}/flask/dashboard:/var/www/spdpaas/src/dashboard:rw
-            - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
+            - ${PWD}/${SERVICES_DIR}/nginx/html/api:/var/www/html/api:rw
+            - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html/web:rw
+            # - api-html:/var/www/html/api:rw
+            # - web-html:/var/www/html/web:rw
+
+            - ${PWD}/${SERVICES_DIR}/flask/dashboard:/var/www/spdpaas/src/dashboard:rw
+            # - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
         # entrypoint: "./crons.sh"
         restart: always
 
@@ -40,8 +42,10 @@ services:
         volumes:
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
-            # - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html:rw
-            - web-html:/var/www/html:rw
+
+            - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html:rw
+            # - web-html:/var/www/html:rw
+
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
 
             # link php-fpm sock
@@ -88,8 +92,9 @@ services:
 
             # link php-fpm sock
             - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
-            # - ${PWD}/${SERVICES_DIR}/flask/dashboard:/var/www/spdpaas/src/dashboard:rw
-            - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
+
+            - ${PWD}/${SERVICES_DIR}/flask/dashboard:/var/www/spdpaas/src/dashboard:rw
+            # - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
 
         restart: always
         environment:
@@ -250,9 +255,9 @@ volumes:
     paas-data:
         # external: true
         name: paas-data
-    web-html:
-        name: web-html
-    api-html:
-        name: api-html
-    paas-dashboard:
-        name: paas-dashboard
+    # web-html:
+    #     name: web-html
+    # api-html:
+    #     name: api-html
+    # paas-dashboard:
+    #     name: paas-dashboard

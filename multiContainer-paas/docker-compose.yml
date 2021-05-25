@@ -43,7 +43,7 @@ services:
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
 
-            - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html:rw
+            - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html/web:rw
             # - web-html:/var/www/html:rw
 
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw

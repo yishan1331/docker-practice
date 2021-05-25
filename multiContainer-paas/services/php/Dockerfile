@@ -15,8 +15,4 @@ RUN apt-get -y update \
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root
 
-RUN touch /var/log/cron.log
-
 WORKDIR /var/www
-
-CMD service cron start && tail -f /var/log/cron.log

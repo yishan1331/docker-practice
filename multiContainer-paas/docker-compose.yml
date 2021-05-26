@@ -133,6 +133,7 @@ services:
             # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
             # - paas-uwsgi-sock:/var/www/spdpaas/run/
             - paas-data:/var/www/spdpaas/src/
+            - api-html:/var/www/html/api:rw
         command:
             [
                 "/bin/sh",

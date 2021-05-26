@@ -30,7 +30,7 @@ services:
         restart: always
         environment:
             TZ: "$TZ"
-            LC_ALL: en_US.UTF-8
+            # LC_ALL: en_US.UTF-8
             LANG: en_US.UTF-8
 
     nginx:
@@ -66,7 +66,7 @@ services:
         restart: always
         environment:
             TZ: "$TZ"
-            LC_ALL: en_US.UTF-8
+            # LC_ALL: en_US.UTF-8
             LANG: en_US.UTF-8
         links:
             - php
@@ -107,7 +107,7 @@ services:
             TZ: "$TZ"
             # - UWSGI_PORT=${FLASK_PORT}
             UWSGI_PORT: ${FLASK_PORT}
-            LC_ALL: en_US.UTF-8
+            # LC_ALL: en_US.UTF-8
             LANG: en_US.UTF-8
         depends_on:
             - flask_app
@@ -145,7 +145,7 @@ services:
         environment:
             TZ: "$TZ"
             UWSGI_PORT: ${FLASK_PORT}
-            LC_ALL: en_US.UTF-8
+            # LC_ALL: en_US.UTF-8
             LANG: en_US.UTF-8
         depends_on:
             - redis
@@ -179,7 +179,7 @@ services:
         entrypoint: ["redis-server", "/etc/redis.conf"]
         environment:
             TZ: "$TZ"
-            LC_ALL: en_US.UTF-8
+            # LC_ALL: en_US.UTF-8
             LANG: en_US.UTF-8
 
     postgres:
@@ -220,7 +220,7 @@ services:
             # MYSQL_USER: ${MYSQL_USER}
             # MYSQL_PASSWORD: ${MYSQL_PASSWORD}
             TZ: "$TZ"
-            LC_ALL: en_US.UTF-8
+            # LC_ALL: en_US.UTF-8
             LANG: en_US.UTF-8
 
     celeryworker:
@@ -241,7 +241,7 @@ services:
         restart: always
         environment:
             TZ: "$TZ"
-            LC_ALL: en_US.UTF-8
+            # LC_ALL: en_US.UTF-8
             LANG: en_US.UTF-8
         depends_on:
             - redis

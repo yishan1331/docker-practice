@@ -3,6 +3,7 @@ FROM ${PHP_VERSION}
 
 ARG TZ
 ARG PHP_EXTENSIONS
+# ENV LANG=C.UTF-8
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 

@@ -18,7 +18,7 @@ services:
             - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
             - ${PWD}/${DATA_DIR}/${PHP_LOG_DIR}:/var/log/php
             # 因flask_app會執行php程式，故須掛載進data
-            - ${PWD}/${DATA_DIR}/php/php_fpm/php:/usr/local/bin/php
+            - php-exe:/usr/local/bin/php
 
             # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
             # - ${PWD}/${SERVICES_DIR}/nginx/html/api:/var/www/html/api:rw
@@ -133,8 +133,8 @@ services:
             # - ${PWD}/${DATA_DIR}/${UWSGI_LOG_DIR}:/var/log/uwsgi/:rw
             # - ${PWD}/${DATA_DIR}/${FLASK_LOG_DIR}:/var/www/spdpaas/log/:ro
 
-            - ${PWD}/${DATA_DIR}/php/php_fpm/php:/usr/local/bin/php
-            
+            - php-exe:/usr/local/bin/php
+
             # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
             # - paas-uwsgi-sock:/var/www/spdpaas/run/
             - paas-data:/var/www/spdpaas/src/
@@ -286,3 +286,5 @@ volumes:
         name: api-html
     paas-dashboard:
         name: paas-dashboard
+    php-exe:
+        name: php-exe

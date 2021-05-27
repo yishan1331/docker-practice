@@ -10,7 +10,8 @@ COPY www /var/www
 RUN apt-get -y update \
     && apt-get install -y vim-gtk less curl cron openssl openssh-client
 
-RUN ssh-keygen -q -t rsa -N '' -f  /root/.ssh/id_rsa
+# COPY ./config /root/.ssh/
+# RUN ssh-keygen -q -t rsa -N '' -f  /root/.ssh/id_rsa
 
 RUN apt-get install -y gcc g++ zlib1g-dev make\
     libssl-dev libffi-dev build-essential python python-dev\

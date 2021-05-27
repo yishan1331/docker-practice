@@ -17,6 +17,9 @@ server {
     location /static {
         root /var/www/spdpaas/src/dashboard;
     }
+    location /api {
+        root /var/www/html/api;
+    }
 
     location ~ \.php$ {
         root /var/www/spdpaas/src/dashboard;

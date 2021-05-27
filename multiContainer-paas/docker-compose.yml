@@ -51,7 +51,6 @@ services:
 
             # - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html/web:rw
             - web-html:/var/www/html/web:rw
-            - api-html:/var/www/html/api:rw
 
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
 

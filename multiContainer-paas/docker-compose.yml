@@ -157,6 +157,7 @@ services:
             - redis
             - postgres
             - mysql
+            - php
         links:
             - redis
             - postgres

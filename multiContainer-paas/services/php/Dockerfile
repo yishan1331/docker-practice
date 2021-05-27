@@ -16,4 +16,6 @@ RUN apt-get -y update \
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root
 
+RUN ln /usr/local/bin/php /var/www/php/
+
 WORKDIR /var/www

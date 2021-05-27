@@ -133,7 +133,7 @@ services:
             # - ${PWD}/${DATA_DIR}/${UWSGI_LOG_DIR}:/var/log/uwsgi/:rw
             # - ${PWD}/${DATA_DIR}/${FLASK_LOG_DIR}:/var/www/spdpaas/log/:ro
 
-            - php-exe:/usr/local/bin/php
+            - php-exe:/usr/local/bin
 
             # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
             # - paas-uwsgi-sock:/var/www/spdpaas/run/

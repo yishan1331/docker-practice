@@ -1,0 +1,5 @@
+Host            Host              # 代號(自己決定)  
+Hostname        192.168.88.71       # IP or Domain name  
+Port            22                # 指定埠口  
+User            devshan              # 使用者名稱  
+identityfile    /root/.ssh/id_rsa    # 指定金鑰  

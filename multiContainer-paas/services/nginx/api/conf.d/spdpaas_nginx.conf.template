@@ -13,47 +13,107 @@ server {
 
     location /dashboard {
         root /var/www/spdpaas/src;
+        location ~ \.php$ {
+            fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+            #wei@09062019
+            fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+
+            #Yishan@03122021
+            #指定連接到後端FastCGI 的超時時間。
+            fastcgi_connect_timeout 300s;
+            #向FastCGI 傳送請求的超時時間，這個值是指已經完成兩次握手後向FastCGI 傳送請求的超時時間。
+            fastcgi_send_timeout 300s;
+            #接收FastCGI 應答的超時時間，這個值是指已經完成兩次握手後接收FastCGI 應答的超時時間。
+            fastcgi_read_timeout 300s;
+            #指定讀取FastCGI 應答第一部分需要用多大的緩沖區，一般第一部分應答不會超過1k，由於頁面大小為4k，所以這里設置為4k。
+            fastcgi_buffer_size 4k;
+            #指定本地需要用多少和多大的緩沖區來緩沖FastCGI 的應答。
+            fastcgi_buffers 8 4k;
+            #默認值是fastcgi_buffers 的兩倍。
+            fastcgi_busy_buffers_size 8k;
+            #在寫入fastcgi_temp_path 時將用多大的數據塊，默認值是fastcgi_buffers 的兩倍。
+            fastcgi_temp_file_write_size 8k;
+
+            #fastcgi_cache TEST #開啟FastCGI 緩存並且為其制定一個名稱。
+
+            ##為指定的應答代碼指定緩存時間，如上例中將200，302 應答緩存一小時，301 應答緩存1 天，其他為1 分鐘。
+            #fastcgi_cache_valid 200 302 1h;
+            #fastcgi_cache_valid 301 1d;
+            #fastcgi_cache_valid any 1m;
+
+            #fastcgi_cache_min_uses 1; #緩存在fastcgi_cache_path 指令inactive 參數值時間內的最少使用次數，如上例，如果在5 分鐘內某文件1 次也沒有被>使用，那麽這個文件將被移除。
+        }
     }
     location /static {
         root /var/www/spdpaas/src/dashboard;
-    }
-    location /api {
-        root /var/www/html/api;
-    }
+        location ~ \.php$ {
+            fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+            #wei@09062019
+            fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
 
-    location ~ \.php$ {
-        root /var/www/spdpaas/src/dashboard;
-        fastcgi_pass unix:/run/php/php7.2-fpm.sock;
-        #wei@09062019
-        fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
+            #Yishan@03122021
+            #指定連接到後端FastCGI 的超時時間。
+            fastcgi_connect_timeout 300s;
+            #向FastCGI 傳送請求的超時時間，這個值是指已經完成兩次握手後向FastCGI 傳送請求的超時時間。
+            fastcgi_send_timeout 300s;
+            #接收FastCGI 應答的超時時間，這個值是指已經完成兩次握手後接收FastCGI 應答的超時時間。
+            fastcgi_read_timeout 300s;
+            #指定讀取FastCGI 應答第一部分需要用多大的緩沖區，一般第一部分應答不會超過1k，由於頁面大小為4k，所以這里設置為4k。
+            fastcgi_buffer_size 4k;
+            #指定本地需要用多少和多大的緩沖區來緩沖FastCGI 的應答。
+            fastcgi_buffers 8 4k;
+            #默認值是fastcgi_buffers 的兩倍。
+            fastcgi_busy_buffers_size 8k;
+            #在寫入fastcgi_temp_path 時將用多大的數據塊，默認值是fastcgi_buffers 的兩倍。
+            fastcgi_temp_file_write_size 8k;
 
-        #Yishan@03122021
-        #指定連接到後端FastCGI 的超時時間。
-        fastcgi_connect_timeout 300s;
-        #向FastCGI 傳送請求的超時時間，這個值是指已經完成兩次握手後向FastCGI 傳送請求的超時時間。
-        fastcgi_send_timeout 300s;
-        #接收FastCGI 應答的超時時間，這個值是指已經完成兩次握手後接收FastCGI 應答的超時時間。
-        fastcgi_read_timeout 300s;
-        #指定讀取FastCGI 應答第一部分需要用多大的緩沖區，一般第一部分應答不會超過1k，由於頁面大小為4k，所以這里設置為4k。
-        fastcgi_buffer_size 4k;
-        #指定本地需要用多少和多大的緩沖區來緩沖FastCGI 的應答。
-        fastcgi_buffers 8 4k;
-        #默認值是fastcgi_buffers 的兩倍。
-        fastcgi_busy_buffers_size 8k;
-        #在寫入fastcgi_temp_path 時將用多大的數據塊，默認值是fastcgi_buffers 的兩倍。
-        fastcgi_temp_file_write_size 8k;
+            #fastcgi_cache TEST #開啟FastCGI 緩存並且為其制定一個名稱。
 
-        #fastcgi_cache TEST #開啟FastCGI 緩存並且為其制定一個名稱。
+            ##為指定的應答代碼指定緩存時間，如上例中將200，302 應答緩存一小時，301 應答緩存1 天，其他為1 分鐘。
+            #fastcgi_cache_valid 200 302 1h;
+            #fastcgi_cache_valid 301 1d;
+            #fastcgi_cache_valid any 1m;
 
-        ##為指定的應答代碼指定緩存時間，如上例中將200，302 應答緩存一小時，301 應答緩存1 天，其他為1 分鐘。
-        #fastcgi_cache_valid 200 302 1h;
-        #fastcgi_cache_valid 301 1d;
-        #fastcgi_cache_valid any 1m;
-
-        #fastcgi_cache_min_uses 1; #緩存在fastcgi_cache_path 指令inactive 參數值時間內的最少使用次數，如上例，如果在5 分鐘內某文件1 次也沒有被>使用，那麽這個文件將被移除。
+            #fastcgi_cache_min_uses 1; #緩存在fastcgi_cache_path 指令inactive 參數值時間內的最少使用次數，如上例，如果在5 分鐘內某文件1 次也沒有被>使用，那麽這個文件將被移除。
+        }
     }
 
+    location /API {
+        root /var/www/html;
+        location ~ \.php$ {
+            fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+            #wei@09062019
+            fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+
+            #Yishan@03122021
+            #指定連接到後端FastCGI 的超時時間。
+            fastcgi_connect_timeout 300s;
+            #向FastCGI 傳送請求的超時時間，這個值是指已經完成兩次握手後向FastCGI 傳送請求的超時時間。
+            fastcgi_send_timeout 300s;
+            #接收FastCGI 應答的超時時間，這個值是指已經完成兩次握手後接收FastCGI 應答的超時時間。
+            fastcgi_read_timeout 300s;
+            #指定讀取FastCGI 應答第一部分需要用多大的緩沖區，一般第一部分應答不會超過1k，由於頁面大小為4k，所以這里設置為4k。
+            fastcgi_buffer_size 4k;
+            #指定本地需要用多少和多大的緩沖區來緩沖FastCGI 的應答。
+            fastcgi_buffers 8 4k;
+            #默認值是fastcgi_buffers 的兩倍。
+            fastcgi_busy_buffers_size 8k;
+            #在寫入fastcgi_temp_path 時將用多大的數據塊，默認值是fastcgi_buffers 的兩倍。
+            fastcgi_temp_file_write_size 8k;
+
+            #fastcgi_cache TEST #開啟FastCGI 緩存並且為其制定一個名稱。
+
+            ##為指定的應答代碼指定緩存時間，如上例中將200，302 應答緩存一小時，301 應答緩存1 天，其他為1 分鐘。
+            #fastcgi_cache_valid 200 302 1h;
+            #fastcgi_cache_valid 301 1d;
+            #fastcgi_cache_valid any 1m;
+
+            #fastcgi_cache_min_uses 1; #緩存在fastcgi_cache_path 指令inactive 參數值時間內的最少使用次數，如上例，如果在5 分鐘內某文件1 次也沒有被>使用，那麽這個文件將被移除。
+        }
+    }
 
     location / { 
         try_files $uri @yourapplication;

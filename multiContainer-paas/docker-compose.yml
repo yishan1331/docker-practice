@@ -21,12 +21,9 @@ services:
             # - php-exe:/usr/local/bin
 
             # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
-            # - ${PWD}/${SERVICES_DIR}/nginx/html/api:/var/www/html/api:rw
-            # - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html/web:rw
-            - api-html:/var/www/html/api:rw
-            - web-html:/var/www/html/web:rw
+            - api-html:/var/www/html/API:rw
+            - web-html:/var/www/html/WEB:rw
 
-            # - ${PWD}/${SERVICES_DIR}/flask/dashboard:/var/www/spdpaas/src/dashboard:rw
             - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
         # entrypoint: "./crons.sh"
         restart: always
@@ -49,8 +46,7 @@ services:
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
             - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
 
-            # - ${PWD}/${SERVICES_DIR}/nginx/html/web:/var/www/html/web:rw
-            - web-html:/var/www/html/web:rw
+            - web-html:/var/www/html/WEB:rw
 
             - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
 
@@ -61,8 +57,6 @@ services:
             # - ${DATA_DIR}/certbot/var:/var/lib/letsencrypt
             - ${PWD}/${SERVICES_DIR}/${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
 
-            # - ${PWD}/${DATA_DIR}/dashboard:/var/www/spdpaas/src/dashboard:rw
-            
             # - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:ro
             # - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:ro
         restart: always
@@ -99,8 +93,7 @@ services:
             # link php-fpm sock
             - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
 
-            - api-html:/var/www/html/api:rw
-            # - ${PWD}/${SERVICES_DIR}/flask/dashboard:/var/www/spdpaas/src/dashboard:rw
+            - api-html:/var/www/html/API:rw
             - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
 
         restart: always
@@ -136,7 +129,7 @@ services:
             # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
             # - paas-uwsgi-sock:/var/www/spdpaas/run/
             - paas-data:/var/www/spdpaas/src/
-            - api-html:/var/www/html/api:rw
+            - api-html:/var/www/html/API:rw
         command:
             [
                 "/bin/sh",

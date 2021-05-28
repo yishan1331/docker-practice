@@ -9,7 +9,10 @@ sudo cp -R ./services/flask/dashboard/* /var/lib/docker/volumes/paas-dashboard/_
 # sudo docker cp $(sudo docker ps | grep flask_app | head -1 | awk '{ print $1 }'):/root/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 # sudo chmod 644 ~/.ssh/authorized_keys
 
+
 docker-compose restart
 docker exec -it php /etc/init.d/rsyslog start
 docker exec -it php /etc/init.d/cron start
+#將crontab作業啟動
+docker exec -it php crontab /var/spool/cron/crontabs/root
 

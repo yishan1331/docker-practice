@@ -1,0 +1,2 @@
+25 0 * * * /usr/local/bin/python /var/app/dailyCalculateAggregatelyApirecords.py > /var/app/dailyCalculateAggregatelyApirecords_output.txt 2>&1
+* * * * * echo "test" >> /var/app/dailyCalculateAggregatelyApirecords_output.txt

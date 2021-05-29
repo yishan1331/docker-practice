@@ -234,7 +234,7 @@ services:
             [
                 "/bin/sh",
                 "-c",
-                "/wait-for-it.sh redis:6379 postgres:5432 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/worker.pid --loglevel=debug --logfile=/var/log/celery/worker.log -c 1000 -P gevent -O fair",
+                "/wait-for-it.sh redis:6379 postgres:5432 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/worker.pid --loglevel=ERROR --logfile=/var/log/celery/worker.log -c 1000 -P gevent -O fair",
             ]
         restart: always
         environment:

@@ -8,10 +8,12 @@ COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
 RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl cron
+    && apt-get install -y vim-gtk less curl cron rsyslog
 
 #COPY app.py /app.py
 COPY var /var
+
+RUN chown root:crontab /var/spool/cron/crontabs/root
 
 # COPY wait-for-it.sh /wait-for-it.sh
 # RUN chmod +x /wait-for-it.sh

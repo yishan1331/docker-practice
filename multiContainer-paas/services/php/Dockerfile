@@ -11,7 +11,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
     install-php-extensions ${PHP_EXTENSIONS}
 
 RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl cron rsyslog
+    && apt-get install -y vim-gtk less curl cron rsyslog logrotate
 
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root

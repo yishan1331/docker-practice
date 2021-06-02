@@ -8,7 +8,7 @@ COPY ./init /init
 COPY www /var/www
 
 RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl cron openssl openssh-client
+    && apt-get install -y vim-gtk less curl cron openssl logrotate
 
 # COPY ./config /root/.ssh/
 # RUN ssh-keygen -q -t rsa -N '' -f  /root/.ssh/id_rsa

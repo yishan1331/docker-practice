@@ -8,7 +8,7 @@ COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
 RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl cron rsyslog
+    && apt-get install -y vim-gtk less curl cron rsyslog logrotate
 
 #COPY app.py /app.py
 COPY var /var

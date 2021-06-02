@@ -15,7 +15,6 @@ def _readConfig():
         FILECONFIG.read(CONFPATH)
 
         dicConfig = {
-            'celery_broker' : FILECONFIG.get('Celery', 'broker'),
             'postgres_ip' : FILECONFIG.get('Postgres', 'ip'),
             'postgres_port' : FILECONFIG.get('Postgres', 'port'),
             'postgres_user' : FILECONFIG.get('Postgres', 'user'),

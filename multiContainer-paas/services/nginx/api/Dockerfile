@@ -2,6 +2,7 @@ FROM nginx
 LABEL maintainer="yishanjob13@gmail.com"
 
 ARG TZ
+
 RUN apt-get -y update \
     && apt-get install -y vim-gtk less logrotate
 

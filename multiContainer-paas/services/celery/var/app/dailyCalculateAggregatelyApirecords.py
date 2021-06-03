@@ -15,13 +15,13 @@ def _readConfig():
         FILECONFIG.read(CONFPATH)
 
         dicConfig = {
-            'postgres_ip' : FILECONFIG.get('Postgres', 'ip'),
-            'postgres_port' : FILECONFIG.get('Postgres', 'port'),
-            'postgres_user' : FILECONFIG.get('Postgres', 'user'),
-            'postgres_pwd' : FILECONFIG.get('Postgres', 'pwd'),
-            'redis_ip' : FILECONFIG.get('Redis', 'ip'),
-            'redis_port' : FILECONFIG.get('Redis', 'port'),
-            'redis_pwd' : FILECONFIG.get('Redis', 'pwd')
+            'postgres_ip' : FILECONFIG.get('postgres', 'ip'),
+            'postgres_port' : FILECONFIG.get('postgres', 'port'),
+            'postgres_user' : FILECONFIG.get('postgres', 'user'),
+            'postgres_pwd' : FILECONFIG.get('postgres', 'password'),
+            'redis_ip' : FILECONFIG.get('redis', 'ip'),
+            'redis_port' : FILECONFIG.get('redis', 'port'),
+            'redis_pwd' : FILECONFIG.get('redis', 'password')
         }
 
         print "~~~~dicConfig~~~~~"
@@ -39,7 +39,9 @@ POOL = redis.ConnectionPool(host='{}'.format(dicConfig.get("redis_ip")), port="{
 
 dbRedis = redis.Redis(connection_pool=POOL)
 
-tempsystemlist = ["IOT","APIDOC","PaaS"]
+import globalvar
+tempsystemlist = globalvar.SYSTEMLIST[globalvar.SERVERIP]
+tempsystemlist.append("PaaS")
 
 for i in tempsystemlist:
     yesterday = datetime.today() + timedelta(-1)

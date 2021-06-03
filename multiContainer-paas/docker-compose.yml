@@ -33,11 +33,11 @@ services:
             LANG: C.UTF-8
 
     nginx:
-        # build:
-        #     context: ${SERVICES_DIR}/nginx/web
-        #     args:
-        #         TZ: "$TZ"
-        image: nginx
+        build:
+            context: ${SERVICES_DIR}/nginx/web
+            args:
+                TZ: "$TZ"
+        # image: nginx
         container_name: nginx_web
         ports:
             - ${NGINX_HTTP_HOST_PORT}:80
@@ -66,11 +66,11 @@ services:
             LANG: C.UTF-8
     
     nginx_api:
-        # build:
-        #     context: ${SERVICES_DIR}/nginx/api
-        #     args:
-        #         TZ: "$TZ"
-        image: nginx
+        build:
+            context: ${SERVICES_DIR}/nginx/api
+            args:
+                TZ: "$TZ"
+        # image: nginx
         container_name: nginx_api
         ports:
             - ${NGINX_UWASI_HOST_PORT}:3687
@@ -228,14 +228,15 @@ services:
                 TZ: "$TZ"
         container_name: celeryworker
         volumes:
-            - ./wait-for-it.sh:/wait-for-it.sh
+            # - ./wait-for-it.sh:/wait-for-it.sh
             - ${PWD}/${DATA_DIR}/${CELERY_LOG_DIR}:/var/log/celery/:rw
-        command:
-            [
-                "/bin/sh",
-                "-c",
-                "/wait-for-it.sh redis:6379 postgres:5432 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/worker.pid --loglevel=ERROR --logfile=/var/log/celery/worker.log -c 1000 -P gevent -O fair",
-            ]
+            - ${PWD}/${SERVICES_DIR}/flask/www/spdpaas/src/app/globalvar.py:/var/app/globalvar.py:ro
+        # command:
+        #     [
+        #         "/bin/sh",
+        #         "-c",
+        #         "/wait-for-it.sh redis:6379 postgres:5432 -t 5 -- celery -A celeryWorker worker --pidfile=/var/run/worker.pid --loglevel=ERROR --logfile=/var/log/celery/worker.log -c 1000 -P gevent -O fair",
+        #     ]
         restart: always
         environment:
             TZ: "$TZ"

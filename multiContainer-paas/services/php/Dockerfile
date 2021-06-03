@@ -19,3 +19,5 @@ RUN chown root:crontab /var/spool/cron/crontabs/root
 # RUN ln /usr/local/bin/php /var/www/phpexe/php
 
 WORKDIR /var/www
+
+CMD /etc/init.d/rsyslog start && crontab /var/spool/cron/crontabs/root && /etc/init.d/cron start && tail -F /var/log/syslog

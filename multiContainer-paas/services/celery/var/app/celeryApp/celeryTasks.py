@@ -21,7 +21,9 @@ from datetime import datetime
 import subprocess #Yishan 05212020 subprocess 取代 os.popen
 from sqlalchemy import Table
 import resource
+import redis
 from celery import Task
+from celery.utils.log import get_task_logger
 #}}}
 
 #=======================================================
@@ -30,33 +32,37 @@ from celery import Task
 #{{{
 from config import config
 from celeryWorker import app
-from modules import ConvertData, retrieve_database_exist, create_database, getDbSessionType
+from modules import ConvertData, retrieve_database_exist, create_database, getDbSessionType, checkexisted_api_count_record_table
 #}}}
 
 __all__ = ('celery_post_api_count_record')
 
+logger = get_task_logger(__name__)
+
 class DBTask(Task):
     _system = None
     _systemSess = {}
-    print("~~~~DBTask~~~~")
+    logger.debug("~~~~DBTask~~~~")
 
     def after_return(self, *args, **kwargs):
-        print("~~~~~after_return~~~~~")
-        print(self._system)
-        print(self._systemSess[self._system])
+        logger.debug("~~~~after_return~~~~")
+        logger.debug(self._system)
+        logger.debug(self._systemSess[self._system])
         if self._systemSess[self._system] is not None:
-            print("^^^^^^^^^^^^^^^^")
+            logger.debug("^^^^^^^^^^^^^^^^")
             self._systemSess[self._system][0].close()
             self._systemSess[self._system][3].remove()
             self._systemSess[self._system][2].dispose()
-            print("vvvvvvvvvvvvvvvv")
+            logger.debug("^^^^^^^^^^^^^^^^")
 
     # @property
     def session(self, system):
         try:
             self._system = system
-            print("self._systemSess -> ",self._systemSess)
-            print("system -> ",system)
+            logger.debug("~~~~self._systemSess~~~")
+            logger.debug(self._systemSess)
+            logger.debug("~~~~system~~~~")
+            logger.debug(system)
 
             # 03172021@Yishan 將不同system的db session存入dict，避免建立新的連接
             if (not self._systemSess.has_key(self._system)):
@@ -65,21 +71,20 @@ class DBTask(Task):
                 from sqlalchemy.engine import create_engine
                 from modules import check_dbconnect_success
                 
-                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(config["postgres_user"],config["postgres_pwd"],config["postgres_ip"],config["postgres_port"],"sapidoapicount_"+system.lower())
-                print("@@@@@@dbUri@@@@@@@@")
-                print(dbUri)
+                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(\
+                            config["postgres_user"],\
+                            config["postgres_pwd"],\
+                            config["postgres_ip"],\
+                            config["postgres_port"],\
+                            "sapidoapicount_"+self._system.lower())
+                logger.debug("~~~~dbUri~~~~")
+                logger.debug(dbUri)
                 _dbEngine = create_engine(dbUri,encoding='utf-8')
-                print("111111111111111")
-
                 _metadata = MetaData(bind=_dbEngine)
-                print("222222222222222")
                 _session = scoped_session(sessionmaker(autocommit=False, \
                                             autoflush=False, \
                                             bind=_dbEngine))
-                print("333333333333333")
-
                 check_status,check_result = check_dbconnect_success(_session, self._system)
-                print("444444444444444")
                 if not check_status: return None,None,check_result
                 
                 _sess = _session()
@@ -92,18 +97,17 @@ class DBTask(Task):
             return None,None,err_msg
 
 def print_mem():
-    print('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    logger.debug('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    # print('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
 @app.task(base=DBTask, bind=True)
 def celery_post_api_count_record(self, threaddata):
-    from modules import checkexisted_api_count_record_table
-    import redis
     threaddata = ConvertData().convert(threaddata)
-    print("~~~~threaddata~~~~")
-    print(self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::])
-    print(threaddata)
+    logger.debug("~~~~threaddata~~~~")
+    logger.debug(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::])
+    logger.debug(self.request.id)
+    logger.debug(threaddata)
     system = threaddata[0]
-    if threaddata[0] == "test": system = "IOT"
     dbName = "sapidoapicount_"+system.lower()
 
     apimethod = threaddata[1]
@@ -123,12 +127,15 @@ def celery_post_api_count_record(self, threaddata):
     engineRaw = sessionResult[2]
     # sessRaw,metaRaw,engineRaw = self.session(system)
     # print "&&&&&&&&&&&&&&&&&&&&&&&&"
-    print(sessRaw,metaRaw,engineRaw)
+    logger.debug(sessRaw)
+    logger.debug(metaRaw)
+    logger.debug(engineRaw)
+    # print(sessRaw,metaRaw,engineRaw)
     # print datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
     # print "&&&&&&&&&&&&&&&&&&&&&&&&"
     if not sessRaw is None:
         try:
-            dbRedis,_,_= getDbSessionType(system="PaaS",dbName=15,forRawData="redis")
+            dbRedis,_,_= getDbSessionType(system=system,dbName=15,forRawData="redis")
             if dbRedis is None:
                 return
 
@@ -170,10 +177,14 @@ def celery_post_api_count_record(self, threaddata):
                             break
                         except redis.WatchError:
                             # 事务执行过程中，如果数据被修改，则抛出异常，程序可以选择重试或退出
-                            print("====redis pipe error====")
-                            print(self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::])
+                            logger.debug("====redis pipe error====")
+                            logger.debug(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::])
+                            logger.debug(self.request.id)
+                            # print("====redis pipe error====")
+                            # print(self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::])
                             count += 1
-                            print(count)
+                            logger.debug(count)
+                            # print(count)
                             if count == 5:
                                 count = 0
 
@@ -184,8 +195,10 @@ def celery_post_api_count_record(self, threaddata):
                                 else:
                                     hash_num = 0
 
-                                print("@@@@@@@@@@redis_count_key@@@@@@@@@@")
-                                print(redis_count_key)
+                                logger.debug("@@@@@@@@@@redis_count_key@@@@@@@@@@")
+                                logger.debug(redis_count_key)
+                                # print("@@@@@@@@@@redis_count_key@@@@@@@@@@")
+                                # print(redis_count_key)
 
                                 if not dbRedis.exists(redis_count_key):
                                     dbRedis.hmset(redis_count_key,{"success_counts":0,"fail_counts":0,"success_averagetime":0,"upload_time":datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
@@ -201,8 +214,10 @@ def celery_post_api_count_record(self, threaddata):
                     # print self.request.id,datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[::]
 
         except Exception as e:
-            print("~~~~e~~~~")
-            print(e)
+            logger.error("~~~~e~~~~")
+            logger.error(e)
+            # print("~~~~e~~~~")
+            # print(e)
 
         finally:
             print_mem()

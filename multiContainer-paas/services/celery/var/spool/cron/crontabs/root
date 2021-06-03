@@ -1,2 +1,2 @@
+59 23 * * * /usr/sbin/logrotate -f /etc/logrotate.d/celery
 25 0 * * * /usr/local/bin/python /var/app/dailyCalculateAggregatelyApirecords.py > /var/app/dailyCalculateAggregatelyApirecords_output.txt 2>&1
-* * * * * echo "test" >> /var/app/dailyCalculateAggregatelyApirecords_output.txt

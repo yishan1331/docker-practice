@@ -1,0 +1,11 @@
+/var/log/celery/*.log {
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+    dateext
+    size +1M
+    sharedscripts
+}

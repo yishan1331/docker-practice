@@ -18,6 +18,8 @@ RUN chown root:crontab /var/spool/cron/crontabs/root
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
+COPY ./uwsgi /etc/logrotate.d/
+
 WORKDIR /var/app
 
 # ENTRYPOINT ["/wait-for-it.sh","redis:6379","postgres:5432","-t","5","--","celery -A celeryWorker worker --pidfile=/var/run/worker.pid --loglevel=ERROR --logfile=/var/log/celery/worker.log -c 1000 -P gevent -O fair"]

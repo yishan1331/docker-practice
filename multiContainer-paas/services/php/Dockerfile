@@ -16,8 +16,7 @@ RUN apt-get -y update \
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root
 
-# RUN ln /usr/local/bin/php /var/www/phpexe/php
-
 WORKDIR /var/www
 
 CMD /etc/init.d/rsyslog start && crontab /var/spool/cron/crontabs/root && /etc/init.d/cron start && tail -F /var/log/syslog
+#https://stackoverflow.com/questions/25135897/how-to-automatically-start-a-service-when-running-a-docker-container

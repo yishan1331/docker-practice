@@ -120,7 +120,7 @@ services:
             args:
                 TZ: "$TZ"
         container_name: flask_app
-        user: www-data
+        # user: www-data
         # ports:
         #     - 3688:3688
         expose:

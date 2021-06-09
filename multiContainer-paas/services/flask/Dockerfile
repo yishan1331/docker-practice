@@ -5,10 +5,10 @@ ARG TZ
 
 # layer caching for faster builds
 COPY ./init /init
-COPY www /var/www
+COPY var /var
 
 RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl cron openssl logrotate
+    && apt-get install -y vim-gtk less curl cron openssl rsyslog logrotate
 
 # COPY ./config /root/.ssh/
 # RUN ssh-keygen -q -t rsa -N '' -f  /root/.ssh/id_rsa
@@ -39,7 +39,7 @@ WORKDIR /var/www/spdpaas
 RUN rm -R Authlib-0.14.3 Authlib-0.14.3.tar.gz
 
 COPY ./uwsgi /etc/logrotate.d/
-RUN chmod +x /init/uwsgi_logrotate.sh
-RUN /bin/bash /init/uwsgi_logrotate.sh
+# RUN chmod +x /init/uwsgi_logrotate.sh
+# RUN /bin/bash /init/uwsgi_logrotate.sh
 
-# CMD ["uwsgi","-i","spdpaas_uwsgi.ini"]
+ENTRYPOINT ["/init/start.sh"]

@@ -58,6 +58,17 @@ function TimeSubtraction($startTime, $endTime, $type)
             return $returnData;
         }
     } else {
-        $returnData = ['$startTime > $endTime'];
+        if ($type == 'hour') {
+            $returnData[0] = "0:0:0";
+            $returnData[1] = "0秒";
+            $returnData[2] = 0;
+            return $returnData;
+        } else if ($type == 'date') {
+            $returnData[0] = "0 0:0:0";
+            $returnData[1] = "0秒";
+            $returnData[2] = 0;
+            return $returnData;
+        }
+        // $returnData = ['$startTime > $endTime'];
     }
 }

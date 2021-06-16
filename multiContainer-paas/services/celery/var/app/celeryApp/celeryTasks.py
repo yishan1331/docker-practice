@@ -72,10 +72,10 @@ class DBTask(Task):
                 from modules import check_dbconnect_success
                 
                 dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(\
-                            config["postgres_user"],\
-                            config["postgres_pwd"],\
-                            config["postgres_ip"],\
-                            config["postgres_port"],\
+                            config["DBPOSTGRESUser"],\
+                            config["DBPOSTGRESPassword"],\
+                            config["DBPOSTGRESIp"],\
+                            config["DBPOSTGRESPort"],\
                             "sapidoapicount_"+self._system.lower())
                 logger.debug("~~~~dbUri~~~~")
                 logger.debug(dbUri)

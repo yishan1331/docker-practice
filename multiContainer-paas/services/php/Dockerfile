@@ -15,8 +15,12 @@ RUN apt-get -y update \
 
 COPY var /var
 RUN chown root:crontab /var/spool/cron/crontabs/root
+RUN chmod +x /var/www/crons.sh
 
 WORKDIR /var/www
 
-CMD /etc/init.d/rsyslog start && crontab /var/spool/cron/crontabs/root && /etc/init.d/cron start && tail -F /var/log/syslog
+ENTRYPOINT ["./crons.sh"]
+#https://stackoverflow.com/questions/44198700/getting-cron-to-run-on-php7-fpm-image
+
+# CMD /etc/init.d/rsyslog start && crontab /var/spool/cron/crontabs/root && /etc/init.d/cron start && tail -F /var/log/syslog
 #https://stackoverflow.com/questions/25135897/how-to-automatically-start-a-service-when-running-a-docker-container

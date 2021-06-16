@@ -2,6 +2,12 @@
 set_time_limit(15);
 date_default_timezone_set('Asia/Taipei');
 
+include(dirname(__FILE__) . "/../globalvar.php");
+
+$myfile = fopen(dirname(__FILE__) . "/newfile.txt", "a") or die("Unable to open file!");
+fwrite($myfile, date("Y-m-d H:i:s")."\n");
+fclose($myfile);
+
 $Query_Device_Response = Query_Device();
 // echo json_encode($Query_Device_Response);
 if($Query_Device_Response) {
@@ -9,9 +15,10 @@ if($Query_Device_Response) {
 }
 
 function Query_Device() {
+    global $publicIP,$publicPort;
     $device_obj = array();
     //查詢machine_status_head，確認該機台最後更新時間
-    $url = "https://localhost:3687/api/CHUNZU/1.0/rd/CommonUse/SpecificKey/mes_device_status_*?uid=@sapido@PaaS&pattern=yes";
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/1.0/rd/CommonUse/SpecificKey/mes_device_status_*?uid=@sapido@PaaS&pattern=yes";
     $options = array(
        "ssl"=>array(
            "verify_peer"=>false,
@@ -93,7 +100,7 @@ function Query_Device() {
             'subquery' => $condition
         )
     );
-    $url = "https://localhost:3687/api/CHUNZU/2.5/myps/Sensor/SqlSyntax?uid=@sapido@PaaS&dbName=site2&getSqlSyntax=yes";
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.5/myps/Sensor/SqlSyntax?uid=@sapido@PaaS&dbName=site2&getSqlSyntax=yes";
     $options = array(
         'http' => array(
             'method' => 'POST',
@@ -205,7 +212,8 @@ function Query_Device() {
 
 //新增
 function Push_Message($push_data) {
-    $url = "https://localhost:3687/api/CHUNZU/2.0/myps/Sensor/Rows/machine_on_off_hist?uid=@sapido@PaaS";
+    global $publicIP,$publicPort;
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.0/myps/Sensor/Rows/machine_on_off_hist?uid=@sapido@PaaS";
     $data = $push_data;
     
     $options = array(

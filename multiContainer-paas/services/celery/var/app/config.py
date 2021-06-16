@@ -6,16 +6,17 @@ CONFIG = ConfigParser.ConfigParser()
 CONFIG.read(CONFPATH)
 
 config = {
-    "celery_broker_ip":CONFIG.get('celery_broker', 'ip'),
-    "celery_broker_port":CONFIG.get('celery_broker', 'port'),
-    "celery_broker_pwd":CONFIG.get('celery_broker', 'password'),
-    "redis_ip":CONFIG.get('redis', 'ip'),
-    "redis_port":CONFIG.get('redis', 'port'),
-    "redis_pwd":CONFIG.get('redis', 'password'),
-    "postgres_ip":CONFIG.get('postgres', 'ip'),
-    "postgres_port":CONFIG.get('postgres', 'port'),
-    "postgres_user":CONFIG.get('postgres', 'user'),
-    "postgres_pwd":CONFIG.get('postgres', 'password')
+    'celery_broker_ip':CONFIG.get('CeleryBroker', 'ip'),
+    'celery_broker_port':CONFIG.get('CeleryBroker', 'port'),
+    'celery_broker_password':CONFIG.get('CeleryBroker', 'password'),
+    'celery_broker_db':CONFIG.get('CeleryBroker', 'db'),
+    "DBREDISIp":CONFIG.get('DataBaseRedis', 'ip'),
+    "DBREDISPort":CONFIG.get('DataBaseRedis', 'port'),
+    "DBREDISPassword":CONFIG.get('DataBaseRedis', 'password'),
+    "DBPOSTGRESIp":CONFIG.get('DataBasePostgresql', 'ip'),
+    "DBPOSTGRESPort":CONFIG.get('DataBasePostgresql', 'port'),
+    "DBPOSTGRESUser":CONFIG.get('DataBasePostgresql', 'user'),
+    "DBPOSTGRESPassword":CONFIG.get('DataBasePostgresql', 'password')
 }
 print "##########config#########"
 print config

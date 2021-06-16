@@ -15,13 +15,14 @@ def _readConfig():
         FILECONFIG.read(CONFPATH)
 
         dicConfig = {
-            'postgres_ip' : FILECONFIG.get('postgres', 'ip'),
-            'postgres_port' : FILECONFIG.get('postgres', 'port'),
-            'postgres_user' : FILECONFIG.get('postgres', 'user'),
-            'postgres_pwd' : FILECONFIG.get('postgres', 'password'),
-            'redis_ip' : FILECONFIG.get('redis', 'ip'),
-            'redis_port' : FILECONFIG.get('redis', 'port'),
-            'redis_pwd' : FILECONFIG.get('redis', 'password')
+            'celery_broker_ip': FILECONFIG.get('CeleryBroker', 'ip'),
+            'celery_broker_port': FILECONFIG.get('CeleryBroker', 'port'),
+            'celery_broker_password': FILECONFIG.get('CeleryBroker', 'password'),
+            'celery_broker_db': FILECONFIG.get('CeleryBroker', 'db'),
+            "DBPOSTGRESIp":FILECONFIG.get('DataBasePostgresql', 'ip'),
+            "DBPOSTGRESPort":FILECONFIG.get('DataBasePostgresql', 'port'),
+            "DBPOSTGRESUser":FILECONFIG.get('DataBasePostgresql', 'user'),
+            "DBPOSTGRESPassword":FILECONFIG.get('DataBasePostgresql', 'password')
         }
 
         print "~~~~dicConfig~~~~~"
@@ -35,7 +36,7 @@ def _readConfig():
 
 dicConfig = _readConfig()
 
-POOL = redis.ConnectionPool(host='{}'.format(dicConfig.get("redis_ip")), port="{}".format(dicConfig.get("redis_port")), db=15,password="{}".format(dicConfig.get("redis_pwd")))
+POOL = redis.ConnectionPool(host=dicConfig.get("celery_broker_ip"), port=dicConfig.get("celery_broker_port"), db=dicConfig.get("celery_broker_db"),password=dicConfig.get("celery_broker_password"))
 
 dbRedis = redis.Redis(connection_pool=POOL)
 
@@ -67,7 +68,7 @@ for i in tempsystemlist:
                 from sqlalchemy.engine import create_engine
                 from modules import check_dbconnect_success
                 
-                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(dicConfig.get("postgres_user"),dicConfig.get("postgres_pwd"),dicConfig.get("postgres_ip"),dicConfig.get("postgres_port"),dbName)
+                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(dicConfig.get("DBPOSTGRESUser"),dicConfig.get("DBPOSTGRESPassword"),dicConfig.get("DBPOSTGRESIp"),dicConfig.get("DBPOSTGRESPort"),dbName)
                 print("@@@@@@dbUri@@@@@@@@")
                 print(dbUri)
                 dbEngine = create_engine(dbUri,encoding='utf-8')

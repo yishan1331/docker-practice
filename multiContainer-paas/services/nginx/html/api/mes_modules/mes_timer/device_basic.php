@@ -2,6 +2,7 @@
 //機台名稱、機台型號、機台類別、機台圖片、機台IP CAM、機台感測點、機台燈號異常表、機台燈號對應表
 date_default_timezone_set("Asia/Taipei");
 
+include(dirname(__FILE__) . "/../globalvar.php");
 include(dirname(__FILE__) . "/../api.php");
 include(dirname(__FILE__) . "/../apiJsonBody.php");
 include(dirname(__FILE__) . "/../connection.php");
@@ -21,6 +22,8 @@ $device_sensor_list = get_sensor_list($device_id_array);
 $device_light_list = get_light_list($device_id_array);
 $device_model_array = array_values(array_unique(array_column($device_basic, 'device_model')));
 $device_light_error_single = get_light_error_single($device_model_array);
+$device_error_level = get_error_level();
+$device_light_error_list = get_light_error_list($device_model_array);
 
 $update_data = array();
 foreach ($device_data as $mes_device_status_key => $mes_device_status_value) {
@@ -51,10 +54,17 @@ foreach ($device_data as $mes_device_status_key => $mes_device_status_value) {
         }
     }
     if (isset($update_data[$mes_device_status_key]['device_model'])) {
-        foreach ($device_light_error_single[$update_data[$mes_device_status_key]['device_model']] as $key => $value) {
+        $device_model = $update_data[$mes_device_status_key]['device_model'];
+        foreach ($device_light_error_single[$device_model] as $key => $value) {
             $update_data[$mes_device_status_key][$key] = $value;
         }
+
+        if (isset($update_data[$mes_device_status_key]['machine_light_list'])) {
+            $update_data[$mes_device_status_key]['machine_light_error_list'] = get_machine_light_error_list($device_light_error_list[$device_model], $update_data[$mes_device_status_key]['machine_light_list']);
+        }
     }
+
+    $update_data[$mes_device_status_key]['error_level'] = $device_error_level;
 }
 // echo json_encode($update_data);
 CommonUpdate($update_data, 'Redis', null);
@@ -201,6 +211,9 @@ function get_sensor_list($device_id_array)
     
     $mes_device = array();
     foreach ($device_basic_data as $key => $value) {
+        if ($value['sensor_class$sensor_class_code'] == 'deviceStatus') {
+            continue;
+        }
         if (!isset($mes_device[$value['device_basic$cus_id'] . '_' . $value['device_basic$id']])) {
             $mes_device[$value['device_basic$cus_id'] . '_' . $value['device_basic$id']] = array();
         }
@@ -233,7 +246,7 @@ function get_light_list($device_id_array)
     }
 
     $query_device_basic = new apiJsonBody_queryJoin;
-    $query_device_basic->addFields('device_basic', ['id', 'cus_id']);
+    $query_device_basic->addFields('device_basic', ['id', 'cus_id', 'model']);
     $query_device_basic->addFields('light_list', ['light_code', 'light_name', 'color_on', 'color_off']);
     $query_device_basic->setTables(['device_basic', 'machine_light_list', 'light_list']);
     $join = new stdClass();
@@ -274,13 +287,21 @@ function get_light_list($device_id_array)
         if (!isset($mes_device[$value['device_basic$cus_id'] . '_' . $value['device_basic$id']]['machine_light_list'][$value['light_list$light_code']])) {
             $mes_device[$value['device_basic$cus_id'] . '_' . $value['device_basic$id']]['machine_light_list'][$value['light_list$light_code']] = array();
         }
+
+        if ($value['light_list$color_on'] == 'red') {
+            $erro_value = 1;
+        } else if ($value['light_list$color_off'] == 'red') {
+            $erro_value = 0;
+        }
+
         $mes_device[$value['device_basic$cus_id'] . '_' . $value['device_basic$id']]['machine_light_list'][$value['light_list$light_code']] = array(
             'name' => $value['light_list$light_name'],
             '1' => $value['light_list$color_on'],
-            '0' => $value['light_list$color_off']
+            '0' => $value['light_list$color_off'],
+            'erro_value' => isset($erro_value) ? $erro_value : null
         );
     }
-        
+
     return $mes_device;
 }
 
@@ -308,7 +329,7 @@ function get_light_error_single($device_model_array)
     foreach ($light_error_single_data as $key => $value) {
         if (!isset($mes_device[$value['model']])) {
             $mes_device[$value['model']] = array();
-        }//機台燈號異常表
+        }
         if (!isset($mes_device[$value['model']]['machine_abn_list'])) {
             $mes_device[$value['model']]['machine_abn_list'] = array();
         }
@@ -322,5 +343,107 @@ function get_light_error_single($device_model_array)
     }
         
     return $mes_device;
+}
+
+//異常等級
+function get_error_level()
+{
+    $query_error_level = new apiJsonBody_query;
+    $query_error_level->setFields(['err_level', 'name']);
+    $query_error_level->setTable('error_level');
+    $query_error_level->setLimit(["ALL"]);
+    $query_error_level_data = $query_error_level->getApiJsonBody();
+    $error_level = CommonSqlSyntax_Query($query_error_level_data, "MySQL");
+    if ($error_level['Response'] !== 'ok') {
+        $error_level_data = [];
+    } else {
+        $error_level_data = $error_level['QueryTableData'];
+    }
+
+    $level_data = array();
+    foreach ($error_level_data as $key => $value) {
+        $level_data[$value['err_level']] = $value['name'];
+    }
+        
+    return $level_data;
+}
+
+//機台燈號異常表
+function get_light_error_list($device_model_array)
+{
+    if (empty($device_model_array)) {
+        return array();
+    }
+
+    $query_light_error_list = new apiJsonBody_query;
+    $query_light_error_list->setFields(['model', 'light_list', 'err_name', 'err_solution']);
+    $query_light_error_list->setTable('light_error_list');
+    $query_light_error_list->addSymbols('model', 'in');
+    $query_light_error_list->addWhere('model', $device_model_array);
+    $query_light_error_list_data = $query_light_error_list->getApiJsonBody();
+    $light_error_list = CommonSqlSyntax_Query($query_light_error_list_data, "MySQL", "no");
+    if ($light_error_list['Response'] !== 'ok') {
+        $light_error_list_data = [];
+    } else {
+        $light_error_list_data = $light_error_list['QueryTableData'];
+    }
+
+    $mes_device = array();
+    foreach ($light_error_list_data as $key => $value) {
+        if (!isset($mes_device[$value['model']])) {
+            $mes_device[$value['model']] = array();
+        }
+
+        array_push($mes_device[$value['model']], array(
+            'light_list' => $value['light_list'],
+            'name' => $value['err_name'],
+            'solution' => $value['err_solution'],
+        ));
+    }
+
+    return $mes_device;
+}
+
+function get_machine_light_error_list($device_light_error_list, $machine_light_list)
+{
+    if (empty($device_light_error_list) || empty($machine_light_list)) {
+        return array();
+    }
+    $check_group_list = array();
+
+    foreach ($device_light_error_list as $light_list_key => $light_list_value) {
+        if (!empty($light_list_value['light_list'])) {
+            if (is_string($light_list_value['light_list'])) {
+                $light_list_value['light_list'] = json_decode($light_list_value['light_list'], true);
+            }
+            $light_list = $light_list_value['light_list'];
+            $group_list = array();
+            foreach ($light_list as $light_code => $light_status) {
+                if (!isset($machine_light_list[$light_code])) {
+                    break;
+                }
+                $erro_value = $machine_light_list[$light_code]['erro_value'];
+                if (!$light_status) {
+                    $group_list[$light_code] = $erro_value;
+                } else {
+                    $group_list[$light_code] = $erro_value ? 0 : 1;
+                }
+            }
+            array_push($check_group_list, array(
+                'light_list' => $group_list,
+                'name' => $light_list_value['name'],
+                'solution' => $light_list_value['solution']
+            ));
+        }
+    }
+    usort($check_group_list, 'sort_light_error_list_time');
+
+    return $check_group_list;
+}
+
+//異常長度排序
+function sort_light_error_list_time($a, $b)
+{
+    return (count($a['light_list']) > count($b['light_list'])) ? -1 : 1;
 }
 ?>

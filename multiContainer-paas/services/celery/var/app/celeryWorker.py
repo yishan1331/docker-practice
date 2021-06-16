@@ -13,12 +13,12 @@ from config import config
 from celeryConfig import BaseConfig as celeryConfig
 
 app = Celery("sapidoPaaS",
-    broker="redis://root:{}@{}:{}/15".format(config["celery_broker_pwd"],config["celery_broker_ip"],config["celery_broker_port"]),
+    broker="redis://root:{}@{}:{}/{}".format(config["celery_broker_password"],config["celery_broker_ip"],config["celery_broker_port"],config["celery_broker_db"]),
     include=["celeryApp.celeryTasks"])
 app.config_from_object(celeryConfig)
 
 import redis
-POOL = redis.ConnectionPool(host=config["celery_broker_ip"], port=config["celery_broker_port"], db=15, password=config["celery_broker_pwd"])
+POOL = redis.ConnectionPool(host=config["celery_broker_ip"], port=config["celery_broker_port"], db=config["celery_broker_db"], password=config["celery_broker_password"])
 dbRedis = redis.Redis(connection_pool=POOL)
 
 if not dbRedis.exists("apirecord_hash_num"):

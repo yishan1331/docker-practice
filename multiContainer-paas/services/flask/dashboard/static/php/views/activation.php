@@ -1,12 +1,7 @@
 <?php
 function MainQuery($params)//主要查詢按鈕
 {
-    // $test = json_decode('{"QueryTableData":[{"device_data_day":{"data":{"F01":{"data":[89,3,26,0,17,53,68,40,0,12,14]}},"data_time":["2021年01月13日","2021年01月14日","2021年01月15日","2021年01月16日","2021年01月17日","2021年01月18日","2021年01月20日","2021年01月21日","2021年01月22日","2021年01月24日","2021年01月25日"]},"device_data_month":{"data":{"F01":{"data":[29.27]}},"data_time":["2021年01月"]},"device_data_year":{"data":{"F01":{"data":[29.27]}},"data_time":["2021年"]},"device_detail_data":[{"date":"2021-01-13","activation":"89%"},{"date":"2021-01-14","activation":"3%"},{"date":"2021-01-15","activation":"26%"},{"date":"2021-01-16","activation":"0%"},{"date":"2021-01-17","activation":"17%"},{"date":"2021-01-18","activation":"53%"},{"date":"2021-01-20","activation":"68%"},{"date":"2021-01-21","activation":"40%"},{"date":"2021-01-22","activation":"0%"},{"date":"2021-01-24","activation":"12%"},{"date":"2021-01-25","activation":"14%"}],"query_date":["2021-01-13 00:00:00","2021-01-25 23:59:59","CBP136L","F01"]}],"Response":"ok"}',true);
-    // return $test;
-
-    if ($params->deviceID == 'F01') {
-        $params->deviceID = 'test_main';
-    }
+    $device_id = $params->deviceID;
 
     $query_now_status = false;
     $now_date = date("Y-m-d");
@@ -28,11 +23,11 @@ function MainQuery($params)//主要查詢按鈕
         $end_date_time = date("Y-m-d 23:59:59", strtotime($params->endTime)+86400);
     }
 
-    if (isset($params->deviceID)) {
+    if (isset($device_id)) {
         $symbols = new stdClass();
-        $symbols->device_name = ['equal'];
+        $symbols->device_id = ['equal'];
         $whereAttr = new stdClass();
-        $whereAttr->device_name = [$params->deviceID];
+        $whereAttr->device_id = [$device_id];
     }
     $data = array(
         'condition_1' => array(
@@ -56,18 +51,16 @@ function MainQuery($params)//主要查詢按鈕
     $Query_Device_Response = $machine_status_sum['QueryTableData'];
 
     if ($query_now_status == true) {
-        $device_name = $params->deviceID;
-        if ($device_name == 'test_main') {
-            $device_name = 'test_emeter';
-        }
-        $device = CommonSpecificKeyQuery('Redis', $device_name, 'no');
+        $cus_id = $params->cusID;
+
+        $device = CommonSpecificKeyQuery('Redis', $cus_id . '_' . $device_id, 'no');
         if ($device['Response'] !== 'ok') {
             return $device;
         }
         $this_device_data = $device['QueryValueData'];
 
         array_push($Query_Device_Response, array(
-            'device_name' => $params->deviceID,
+            'device_id' => $device_id,
             'machine_detail' => array(
                 'R' => array(
                     'datail' => [],
@@ -77,7 +70,7 @@ function MainQuery($params)//主要查詢按鈕
             'upload_at' => date("Y-m-d", strtotime($now_date_time)+86400)
         ));
 
-        // $Query_Device_data = Query_Device(date("Y-m-d 08:00:00"), $now_date_time, isset($params->deviceID)?$params->deviceID:null, isset($params->process)?$params->process:null);
+        // $Query_Device_data = Query_Device(date("Y-m-d 08:00:00"), $now_date_time, isset($device_id)?$device_id:null, isset($params->process)?$params->process:null);
         // for ($i=0; $i < count($Query_Device_data); $i++) { 
         //     $Query_Device_data[$i]['upload_at'] = date("Y-m-d", strtotime($now_date_time)+86400);
         //     array_push($Query_Device_Response, $Query_Device_data[$i]);
@@ -125,20 +118,20 @@ function MainQuery($params)//主要查詢按鈕
             array_push($device_data_year['data_time'], $this_date[0] . '年');
         }
         //圖表y座標，與年和月的資料筆數
-        if ($status_value['device_name'] == 'test_main') {
-            $status_value['device_name'] = 'F01';
+        if ($status_value['device_id'] == 'test_main') {
+            $status_value['device_id'] = 'F01';
         }
-        if (!isset($device_data_day['data'][$status_value['device_name']])) {
-            $device_data_day['data'][$status_value['device_name']] = array('data' => []);
+        if (!isset($device_data_day['data'][$status_value['device_id']])) {
+            $device_data_day['data'][$status_value['device_id']] = array('data' => []);
         }
-        if (!isset($device_data_week['data'][$status_value['device_name']])) {
-            $device_data_week['data'][$status_value['device_name']] = array('data' => [], 'data_qty' => []);
+        if (!isset($device_data_week['data'][$status_value['device_id']])) {
+            $device_data_week['data'][$status_value['device_id']] = array('data' => [], 'data_qty' => []);
         }
-        if (!isset($device_data_month['data'][$status_value['device_name']])) {
-            $device_data_month['data'][$status_value['device_name']] = array('data' => [], 'data_qty' => []);
+        if (!isset($device_data_month['data'][$status_value['device_id']])) {
+            $device_data_month['data'][$status_value['device_id']] = array('data' => [], 'data_qty' => []);
         }
-        if (!isset($device_data_year['data'][$status_value['device_name']])) {
-            $device_data_year['data'][$status_value['device_name']] = array('data' => [], 'data_qty' => []);
+        if (!isset($device_data_year['data'][$status_value['device_id']])) {
+            $device_data_year['data'][$status_value['device_id']] = array('data' => [], 'data_qty' => []);
         }
 
         // //加總運轉時間
@@ -151,32 +144,32 @@ function MainQuery($params)//主要查詢按鈕
 
         //紀錄圖表y座標，與年和月的資料筆數
         $position = array_search($this_date[0] . '年' . $this_date[1] . '月' . $this_date[2] . '日', $device_data_day['data_time']);
-        if (!isset($device_data_day['data'][$status_value['device_name']]['data'][$position])) {
-            $device_data_day['data'][$status_value['device_name']]['data'][$position] = $this_activation;
+        if (!isset($device_data_day['data'][$status_value['device_id']]['data'][$position])) {
+            $device_data_day['data'][$status_value['device_id']]['data'][$position] = $this_activation;
         }
         $position = array_search($this_week . '周', $device_data_week['data_time']);
-        if (!isset($device_data_week['data'][$status_value['device_name']]['data'][$position])) {
-            $device_data_week['data'][$status_value['device_name']]['data'][$position] = $this_activation;
-            $device_data_week['data'][$status_value['device_name']]['data_qty'][$position] = 1;
+        if (!isset($device_data_week['data'][$status_value['device_id']]['data'][$position])) {
+            $device_data_week['data'][$status_value['device_id']]['data'][$position] = $this_activation;
+            $device_data_week['data'][$status_value['device_id']]['data_qty'][$position] = 1;
         } else {
-            $device_data_week['data'][$status_value['device_name']]['data'][$position] += $this_activation;
-            $device_data_week['data'][$status_value['device_name']]['data_qty'][$position]++;
+            $device_data_week['data'][$status_value['device_id']]['data'][$position] += $this_activation;
+            $device_data_week['data'][$status_value['device_id']]['data_qty'][$position]++;
         }
         $position = array_search($this_date[0] . '年' . $this_date[1] . '月', $device_data_month['data_time']);
-        if (!isset($device_data_month['data'][$status_value['device_name']]['data'][$position])) {
-            $device_data_month['data'][$status_value['device_name']]['data'][$position] = $this_activation;
-            $device_data_month['data'][$status_value['device_name']]['data_qty'][$position] = 1;
+        if (!isset($device_data_month['data'][$status_value['device_id']]['data'][$position])) {
+            $device_data_month['data'][$status_value['device_id']]['data'][$position] = $this_activation;
+            $device_data_month['data'][$status_value['device_id']]['data_qty'][$position] = 1;
         } else {
-            $device_data_month['data'][$status_value['device_name']]['data'][$position] += $this_activation;
-            $device_data_month['data'][$status_value['device_name']]['data_qty'][$position]++;
+            $device_data_month['data'][$status_value['device_id']]['data'][$position] += $this_activation;
+            $device_data_month['data'][$status_value['device_id']]['data_qty'][$position]++;
         }
         $position = array_search($this_date[0] . '年', $device_data_year['data_time']);
-        if (!isset($device_data_year['data'][$status_value['device_name']]['data'][$position])) {
-            $device_data_year['data'][$status_value['device_name']]['data'][$position] = $this_activation;
-            $device_data_year['data'][$status_value['device_name']]['data_qty'][$position] = 1;
+        if (!isset($device_data_year['data'][$status_value['device_id']]['data'][$position])) {
+            $device_data_year['data'][$status_value['device_id']]['data'][$position] = $this_activation;
+            $device_data_year['data'][$status_value['device_id']]['data_qty'][$position] = 1;
         } else {
-            $device_data_year['data'][$status_value['device_name']]['data'][$position] += $this_activation;
-            $device_data_year['data'][$status_value['device_name']]['data_qty'][$position]++;
+            $device_data_year['data'][$status_value['device_id']]['data'][$position] += $this_activation;
+            $device_data_year['data'][$status_value['device_id']]['data_qty'][$position]++;
         }
         //紀錄表格資料
         array_push($device_detail_data, array(
@@ -184,31 +177,31 @@ function MainQuery($params)//主要查詢按鈕
             // 'site' => '二廠',
             // 'group' => '成四組',
             // 'class' => '日班',
-            // 'device_name' => $status_value['device_name'],
+            // 'device_id' => $status_value['device_id'],
             'activation' => $this_activation . '%',
         ));
     }
 
     //計算周稼動率，並清除紀錄筆數資料
-    foreach ($device_data_week['data'] as $device_name => $device_value) {
+    foreach ($device_data_week['data'] as $device_id => $device_value) {
         for ($i=0; $i < count($device_value['data']); $i++) { 
-            $device_data_week['data'][$device_name]['data'][$i] = round($device_value['data'][$i] / $device_value['data_qty'][$i], 2);
+            $device_data_week['data'][$device_id]['data'][$i] = round($device_value['data'][$i] / $device_value['data_qty'][$i], 2);
         }
-        unset($device_data_week['data'][$device_name]['data_qty']);
+        unset($device_data_week['data'][$device_id]['data_qty']);
     }
     //計算月份稼動率，並清除紀錄筆數資料
-    foreach ($device_data_month['data'] as $device_name => $device_value) {
+    foreach ($device_data_month['data'] as $device_id => $device_value) {
         for ($i=0; $i < count($device_value['data']); $i++) { 
-            $device_data_month['data'][$device_name]['data'][$i] = round($device_value['data'][$i] / $device_value['data_qty'][$i], 2);
+            $device_data_month['data'][$device_id]['data'][$i] = round($device_value['data'][$i] / $device_value['data_qty'][$i], 2);
         }
-        unset($device_data_month['data'][$device_name]['data_qty']);
+        unset($device_data_month['data'][$device_id]['data_qty']);
     }
     //計算年份稼動率，並清除紀錄筆數資料
-    foreach ($device_data_year['data'] as $device_name => $device_value) {
+    foreach ($device_data_year['data'] as $device_id => $device_value) {
         for ($i=0; $i < count($device_value['data']); $i++) { 
-            $device_data_year['data'][$device_name]['data'][$i] = round($device_value['data'][$i] / $device_value['data_qty'][$i], 2);
+            $device_data_year['data'][$device_id]['data'][$i] = round($device_value['data'][$i] / $device_value['data_qty'][$i], 2);
         }
-        unset($device_data_year['data'][$device_name]['data_qty']);
+        unset($device_data_year['data'][$device_id]['data_qty']);
     }
 
     if (count($device_detail_data) == 0) {
@@ -220,9 +213,58 @@ function MainQuery($params)//主要查詢按鈕
     $returnData['QueryTableData'][0]['device_data_month'] = $device_data_month;
     $returnData['QueryTableData'][0]['device_data_year'] = $device_data_year;
     $returnData['QueryTableData'][0]['device_detail_data'] = $device_detail_data;
-    $returnData['QueryTableData'][0]['query_date'] = [$params->startTime, $params->endTime, $params->model, $params->deviceID == 'test_main' ? 'F01' : $params->deviceID];
+    // $returnData['QueryTableData'][0]['query_date'] = [$params->startTime, $params->endTime, $params->model, $device_id == 'test_main' ? 'F01' : $device_id];
     $returnData['Response'] = 'ok';
     return  $returnData;
+}
+
+function SelectOption($params)
+{
+    //回傳的資料
+    $returnData['QueryTableData'] = [];
+    $cus_id = $params->cusID;
+    //查詢所有機台
+    $device = CommonSpecificKeyQuery('Redis', $cus_id . '_*', 'yes');
+    if ($device['Response'] !== 'ok') {
+        return;
+    }
+    $device_data = $device['QueryValueData'];
+
+    $model_array = array();
+    $device_array = array();
+    foreach ($device_data as $key => $value) {
+        $this_device_model = $value['device_model'];
+        $this_device_id = $value['device_id'];
+        $this_device_name = $value['device_name'];
+        if (gettype(array_search($this_device_model.'', array_column($model_array, 'value'))) == 'boolean') {
+            array_push($model_array, array(
+                'value' => $this_device_model,
+                'text' => $this_device_model,
+            ));
+        }
+        if (!isset($device_array[$this_device_model])) {
+            $device_array[$this_device_model] = array();
+        }
+        array_push($device_array[$this_device_model], array(
+            'value' => $this_device_id,
+            'text' => $this_device_name,
+        ));
+    }
+    sort($model_array);
+    foreach ($device_array as $key => $value) {
+        usort($device_array[$key], 'sort_device');
+    }
+    array_push($returnData['QueryTableData'], array(
+        'model' => $model_array,
+        'device' => $device_array
+    ));
+
+    $returnData['Response'] = 'ok';
+    return $returnData;
+}
+
+function sort_device($a, $b){
+    return ($a['value'] > $b['value']) ? 1 : -1;
 }
 
 function Query_Device($startTime, $endTime, $select_device_name = null, $process = 5) {

@@ -1,4 +1,5 @@
 <?php
+include(dirname(__FILE__) . "/globalvar.php");
 include(dirname(__FILE__) . "/api.php");
 include(dirname(__FILE__) . "/connection.php");
 

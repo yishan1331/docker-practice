@@ -1,10 +1,19 @@
 <?php
-// //製程代號、機台型號、機台每分鐘產量、機型圖片
-// date_default_timezone_set("Asia/Taipei");
+//製程代號、機台型號、機台每分鐘產量、機型圖片
+date_default_timezone_set("Asia/Taipei");
 
-// include(dirname(__FILE__) . "/../api.php");
-// include(dirname(__FILE__) . "/../apiJsonBody.php");
-// include(dirname(__FILE__) . "/../connection.php");
+include(dirname(__FILE__) . "/../globalvar.php");
+include(dirname(__FILE__) . "/../api.php");
+include(dirname(__FILE__) . "/../apiJsonBody.php");
+include(dirname(__FILE__) . "/../connection.php");
+
+// $data = array(
+//     "emailTitle" => "F01異常警報通知",
+//     "emailContent" => "F01<br>異常:潤滑油壓不足(主滑台側),潤滑油壓不足(剪斷側),潤滑油量異常<br>時間:". date("Y-m-d H:i:s") ,
+//     "emailAddress" => ["chang.shuwei.1996@gmail.com", "shirley33969@sapido.com.tw"]
+// );
+// // echo json_encode($data);
+// echo json_encode(SendEmails($data));
 
 // //查詢所有機台
 // $device = CommonSpecificKeyQuery('Redis', '*', 'yes');
@@ -15,14 +24,18 @@
 
 // $update_data = array();
 // foreach ($device_data as $key => $value) {
+//     // $value['operatelog_information'] = json_decode($value['operatelog_information'], true);
+//     // $value['stack_bar_information'] = json_decode($value['stack_bar_information'], true);
+    
+
 //     $update_data[$key] = array(
-//         'operatelog_information' => '[{"status": "-", "alarmCode": "", "durationTime": "03:18:16", "startTime": "2021-04-26 08:00:00", "endTime": "2021-04-26 11:18:16", "alarmDetail": ""}, {"status": "警報", "alarmVideo": "", "alarmCode": "", "durationTime": "00:47:30", "startTime": "2021-04-26 11:18:16", "endTime": "2021-04-26 12:05:46", "alarmDetail": ""}, {"status": "關機", "alarmCode": "", "durationTime": "00:13:22", "startTime": "2021-04-26 11:56:00", "endTime": "2021-04-26 12:09:22", "alarmDetail": ""}, {"status": "警報", "alarmVideo": "", "alarmCode": "", "durationTime": "01:32:19", "startTime": "2021-04-26 12:09:22", "endTime": "2021-04-26 13:41:41", "alarmDetail": ""}, {"status": "待機", "alarmVideo": "", "alarmCode": "", "durationTime": null, "startTime": "2021-04-26 13:41:41", "endTime": "2021-04-26 13:41:41", "alarmDetail": ""}, {"status": "警報", "alarmVideo": "", "alarmCode": "", "durationTime": "00:04:13", "startTime": "2021-04-26 13:41:41", "endTime": "2021-04-26 13:45:54", "alarmDetail": ""}, {"status": "待機", "alarmVideo": "", "alarmCode": "", "durationTime": "00:00:01", "startTime": "2021-04-26 13:45:54", "endTime": "2021-04-26 13:45:55", "alarmDetail": ""}, {"status": "警報", "alarmVideo": "", "alarmCode": "", "durationTime": "00:39:02", "startTime": "2021-04-26 13:45:55", "endTime": "2021-04-26 14:24:57", "alarmDetail": ""}, {"status": "待機", "alarmVideo": "", "alarmCode": "", "durationTime": "00:00:01", "startTime": "2021-04-26 14:24:57", "endTime": "2021-04-26 14:24:58", "alarmDetail": ""}, {"status": "警報", "alarmVideo": "", "alarmCode": "", "durationTime": "00:14:05", "startTime": "2021-04-26 14:24:58", "endTime": "2021-04-26 14:39:03", "alarmDetail": ""}, {"status": "待機", "alarmVideo": "", "alarmCode": "", "durationTime": "00:00:01", "startTime": "2021-04-26 14:39:03", "endTime": "2021-04-26 14:39:04", "alarmDetail": ""}, {"status": "警報", "alarmVideo": "", "alarmCode": "", "durationTime": "00:21:20", "startTime": "2021-04-26 14:39:04", "endTime": "2021-04-26 15:00:24", "alarmDetail": ""}]',
-//         'stack_bar_information' => '[{"status": null, "endTime": "2021-04-26 11:18:16", "alarmDetail": "", "startTime": "2021-04-26 08:00:00", "duration_number": 11896}, {"status": "警報", "endTime": "2021-04-26 12:05:46", "alarmDetail": "", "startTime": "2021-04-26 11:18:16", "duration_number": 2850}, {"status": "關機", "endTime": "2021-04-26 12:09:22", "alarmDetail": "", "startTime": "2021-04-26 11:56:00", "duration_number": 802}, {"status": "警報", "endTime": "2021-04-26 13:41:41", "alarmDetail": "", "startTime": "2021-04-26 12:09:22", "duration_number": 5539}, {"status": "待機", "endTime": "2021-04-26 13:41:41", "alarmDetail": "", "startTime": "2021-04-26 13:41:41", "duration_number": null}, {"status": "警報", "endTime": "2021-04-26 13:45:54", "alarmDetail": "", "startTime": "2021-04-26 13:41:41", "duration_number": 253}, {"status": "待機", "endTime": "2021-04-26 13:45:55", "alarmDetail": "", "startTime": "2021-04-26 13:45:54", "duration_number": 1}, {"status": "警報", "endTime": "2021-04-26 14:24:57", "alarmDetail": "", "startTime": "2021-04-26 13:45:55", "duration_number": 2342}, {"status": "待機", "endTime": "2021-04-26 14:24:58", "alarmDetail": "", "startTime": "2021-04-26 14:24:57", "duration_number": 1}, {"status": "警報", "endTime": "2021-04-26 14:39:03", "alarmDetail": "", "startTime": "2021-04-26 14:24:58", "duration_number": 845}, {"status": "待機", "endTime": "2021-04-26 14:39:04", "alarmDetail": "", "startTime": "2021-04-26 14:39:03", "duration_number": 1}, {"status": "警報", "endTime": "2021-04-26 15:00:24", "alarmDetail": "", "startTime": "2021-04-26 14:39:04", "duration_number": 1280}]',
+//         'operatelog_information' => '',
+//         'stack_bar_information' => '',
 //     );
 // }
 
 // // echo json_encode($update_data);
-// CommonUpdate($update_data, 'Redis', null);
+// // CommonUpdate($update_data, 'Redis', null);
 
 // insert into machine_sensor_list value (1, 1, 1, default, 'max', NULL, '60' , '℃', 'root', 'root',default,default) ;
 // insert into machine_sensor_list value (1, 2, 2, default, 'max', NULL, '60' , '℃', 'root', 'root',default,default) ;

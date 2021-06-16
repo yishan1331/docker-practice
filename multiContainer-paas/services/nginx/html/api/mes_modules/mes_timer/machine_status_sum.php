@@ -1,8 +1,9 @@
 <?php
 ini_set('memory_limit', '1024M');
-set_time_limit(180);
+set_time_limit(240);
 date_default_timezone_set("Asia/Taipei");
 
+include(dirname(__FILE__) . "/../globalvar.php");
 include(dirname(__FILE__) . "/../api.php");
 include(dirname(__FILE__) . "/../apiJsonBody.php");
 include(dirname(__FILE__) . "/../connection.php");
@@ -239,7 +240,8 @@ function Query_All_Device_On_Off($previous_time, $now_time, $device_mem_data) {
 
 //查詢機台機型
 function Query_machine_model($machine_status_head_data){
-    $url = "https://localhost:3687/api/CHUNZU/2.0/ms/CommonUse/SqlSyntax?uid=@sapido@PaaS&getSqlSyntax=no";
+    global $publicIP,$publicPort;
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.0/ms/CommonUse/SqlSyntax?uid=@sapido@PaaS&getSqlSyntax=no";
     $device_name = [];
     $davice_symbol = [];
     foreach ($machine_status_head_data as $key => $value) {
@@ -295,7 +297,8 @@ function Query_machine_model($machine_status_head_data){
 
 //查詢機型燈號
 function Query_machine_light($machine_model_data){
-    $url = "https://localhost:3687/api/CHUNZU/2.0/my/CommonUse/SqlSyntax?uid=@sapido@PaaS&getSqlSyntax=no";
+    global $publicIP,$publicPort;
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.0/my/CommonUse/SqlSyntax?uid=@sapido@PaaS&getSqlSyntax=no";
     $device_model = [];
     $davice_symbol = [];
     $davice_model = array();
@@ -387,7 +390,8 @@ function Query_machine_light_abn($machine_light_data, $machine_abn_data){
 
 //查詢machine_abn，機台異常資料
 function Query_All_Device_Abn() {
-    $url = "https://localhost:3687/api/CHUNZU/1.0/my/CommonUse/TableData?table=machine_abn&uid=@sapido@PaaS";
+    global $publicIP,$publicPort;
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/1.0/my/CommonUse/TableData?table=machine_abn&uid=@sapido@PaaS";
     //The JSON data.
     $options = array(
         "ssl"=>array(
@@ -419,10 +423,23 @@ function Query_All_Device_Abn() {
 
 //查詢單一機台當日資料
 function Query_Device_Data($cus_device_id, $machine_light_list, $previous_time, $now_time) {
-    $url = "https://localhost:3687/api/CHUNZU/2.5/myps/Sensor/SqlSyntax?uid=@sapido@PaaS&dbName=site2&getSqlSyntax=no";
+    global $publicIP,$publicPort;
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.5/myps/Sensor/SqlSyntax?uid=@sapido@PaaS&dbName=site2&getSqlSyntax=no";
     if (!empty($cus_device_id)) {
         // $fields = array_keys($machine_light_list);
         // array_push($fields, 'upload_at', 'opr', 'error_code');
+
+        // //單機版
+        // $split_first_time = date("Y-m-d 16:00:00", strtotime($previous_time));
+        // $split_second_time = date("Y-m-d 00:00:00", strtotime($now_time));
+        // // $time = [[$previous_time, $half_time], [$half_time, $now_time]];
+        // $time = [[$previous_time, $split_first_time], [$split_first_time, $split_second_time], [$split_second_time, $now_time]];
+        // $device_return_data = array();
+        // $device_return_data = array_merge($device_return_data, query_device_split($cus_device_id, $previous_time, $split_first_time, $split_second_time, $now_time));
+        // usort($device_return_data, 'sort_upload_at');
+        // return $device_return_data;
+
+        //積聯網
         $data = array(
             'condition_1' => array(
                 'fields' => "",
@@ -488,6 +505,185 @@ function Query_Device_Data($cus_device_id, $machine_light_list, $previous_time, 
     }
 }
 
+// //單機版
+// function query_device_split($cus_device_id, $previous_time, $split_first_time, $split_second_time, $now_time){
+//     global $publicIP,$publicPort;
+//     $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.5/myps/Sensor/SqlSyntax?uid=@sapido@PaaS&dbName=site2&getSqlSyntax=no";
+//     $device_data = array();
+//     $data1 = array(
+//         'condition_1' => array(
+//             'fields' => "",
+//             'intervaltime' => array(
+//                 "upload_at" => array([$previous_time, $split_first_time])
+//             ),
+//             'table' => $cus_device_id . '_main',
+//             'orderby' => ["asc", "upload_at"],
+//             'limit' => ["ALL"],
+//             'where' => "",
+//             'symbols' => "",
+//             'union' => "",
+//             'subquery' => ""
+//         )
+//     );
+//     try {
+//         $ch = curl_init($url);
+    
+//         // Check if initialization had gone wrong*    
+//         if ($ch === false) {
+//             throw new Exception('failed to initialize');
+//         }
+
+//         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+//             'Content-Type: application/json',
+//             'Content-Length: ' . strlen(json_encode($data1)))
+//         );
+//         curl_setopt($ch, CURLOPT_POST, 1);
+//         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+//         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data1));
+//         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, '0');
+//         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, '0');
+//         // curl_setopt(/* ... */);
+    
+//         $content = curl_exec($ch);
+//         $result = json_decode($content, true);
+
+//         if ($result['Response'] !== 'ok') {
+//             $result_data =  [];
+//         } else if (count($result['QueryTableData']) == 0) {
+//             $result_data =  [];
+//         } else {
+//             $result_data =  $result['QueryTableData'];
+//         }
+//         // Check the return value of curl_exec(), too
+//         if ($content === false) {
+//             throw new Exception(curl_error($ch), curl_errno($ch));
+//         }
+//         /* Process $content here */
+        
+//         // Close curl handle
+//         curl_close($ch);
+//         $device_data = array_merge($device_data, $result_data);
+//     } catch(Exception $e) {
+//         return $e;
+//     }
+//     $data2 = array(
+//         'condition_1' => array(
+//             'fields' => "",
+//             'intervaltime' => array(
+//                 "upload_at" => array([$split_first_time, $split_second_time])
+//             ),
+//             'table' => $cus_device_id . '_main',
+//             'orderby' => ["asc", "upload_at"],
+//             'limit' => ["ALL"],
+//             'where' => "",
+//             'symbols' => "",
+//             'union' => "",
+//             'subquery' => ""
+//         )
+//     );
+//     try {
+//         $ch = curl_init($url);
+    
+//         // Check if initialization had gone wrong*    
+//         if ($ch === false) {
+//             throw new Exception('failed to initialize');
+//         }
+
+//         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+//             'Content-Type: application/json',
+//             'Content-Length: ' . strlen(json_encode($data2)))
+//         );
+//         curl_setopt($ch, CURLOPT_POST, 1);
+//         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+//         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data2));
+//         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, '0');
+//         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, '0');
+//         // curl_setopt(/* ... */);
+    
+//         $content = curl_exec($ch);
+//         $result = json_decode($content, true);
+
+//         if ($result['Response'] !== 'ok') {
+//             $result_data =  [];
+//         } else if (count($result['QueryTableData']) == 0) {
+//             $result_data =  [];
+//         } else {
+//             $result_data =  $result['QueryTableData'];
+//         }
+//         // Check the return value of curl_exec(), too
+//         if ($content === false) {
+//             throw new Exception(curl_error($ch), curl_errno($ch));
+//         }
+//         /* Process $content here */
+        
+//         // Close curl handle
+//         curl_close($ch);
+//         $device_data = array_merge($device_data, $result_data);
+//     } catch(Exception $e) {
+//         return $e;
+//     }
+//     $data3 = array(
+//         'condition_1' => array(
+//             'fields' => "",
+//             'intervaltime' => array(
+//                 "upload_at" => array([$split_second_time, $now_time])
+//             ),
+//             'table' => $cus_device_id . '_main',
+//             'orderby' => ["asc", "upload_at"],
+//             'limit' => ["ALL"],
+//             'where' => "",
+//             'symbols' => "",
+//             'union' => "",
+//             'subquery' => ""
+//         )
+//     );
+//     try {
+//         $ch = curl_init($url);
+    
+//         // Check if initialization had gone wrong*    
+//         if ($ch === false) {
+//             throw new Exception('failed to initialize');
+//         }
+
+//         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+//             'Content-Type: application/json',
+//             'Content-Length: ' . strlen(json_encode($data3)))
+//         );
+//         curl_setopt($ch, CURLOPT_POST, 1);
+//         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+//         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data3));
+//         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, '0');
+//         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, '0');
+//         // curl_setopt(/* ... */);
+    
+//         $content = curl_exec($ch);
+//         $result = json_decode($content, true);
+
+//         if ($result['Response'] !== 'ok') {
+//             $result_data =  [];
+//         } else if (count($result['QueryTableData']) == 0) {
+//             $result_data =  [];
+//         } else {
+//             $result_data =  $result['QueryTableData'];
+//         }
+//         // Check the return value of curl_exec(), too
+//         if ($content === false) {
+//             throw new Exception(curl_error($ch), curl_errno($ch));
+//         }
+//         /* Process $content here */
+        
+//         // Close curl handle
+//         curl_close($ch);
+//         $device_data = array_merge($device_data, $result_data);
+//     } catch(Exception $e) {
+//         return $e;
+//     }
+//     return $device_data;
+// }
+
 //機台新增感測項目需在此新增
 //整理取得該機台當日時間區間資料
 function Get_Device_Detail_Time($device_data, $machine_light_list, $machine_abn_list, $previous_time) {
@@ -511,14 +707,17 @@ function Get_Device_Detail_Time($device_data, $machine_light_list, $machine_abn_
                 $chain_this_data[$key] = $machine_detail[$key];
             }
 
-            if (isset($machine_detail['error_code'])) {
-                $chain_this_data['error_code'] = json_encode($machine_detail['error_code']);
-            }
-
             if (isset($machine_detail['opr'])) {
                 $chain_this_data['opr'] = $machine_detail['opr'];
             } else {
                 $chain_this_data['opr'] = 0;
+            }
+            
+            if (isset($machine_detail['error_code'])) {
+                $chain_this_data['error_code'] = json_encode($machine_detail['error_code']);
+                if (!empty($machine_detail['error_code'])) {
+                    $chain_this_data['opr'] = -1;
+                }
             }
 
             if (count($machine_detail_old_Data) == 0) {
@@ -601,7 +800,8 @@ function Device_Stop_Time($device_id, $machine_on_off_hist_data, $previous_time,
             }
         }
     } else {
-        $url = "https://localhost:3687/api/CHUNZU/2.5/myps/Sensor/SqlSyntax?uid=@sapido@PaaS&dbName=site2&getSqlSyntax=no";
+        global $publicIP,$publicPort;
+        $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.5/myps/Sensor/SqlSyntax?uid=@sapido@PaaS&dbName=site2&getSqlSyntax=no";
         $symbols = new stdClass();
         $symbols->device_id = "equal";
         $whereAttr = new stdClass();
@@ -876,6 +1076,12 @@ function Check_Time_No_Cross($machine_status_detail) {
 }
 
 //陣列裡的machine_detail的timestamp的排序
+function sort_upload_at($a, $b){
+    if(strtotime($a['upload_at']) == strtotime($b['upload_at'])) return 0;
+    return (strtotime($a['upload_at']) > strtotime($b['upload_at'])) ? 1 : -1;
+}
+
+//陣列裡的machine_detail的timestamp的排序
 function sort_machine_detail_time($a, $b){
     if(strtotime($a['machine_detail']['timestamp']) == strtotime($b['machine_detail']['timestamp'])) return 0;
     return (strtotime($a['machine_detail']['timestamp']) > strtotime($b['machine_detail']['timestamp'])) ? 1 : -1;
@@ -919,7 +1125,8 @@ function is_time_cross($source_begin_time_1 = '', $source_end_time_1 = '', $sour
 
 //新增一筆紀錄
 function Push_Data($push_data) {
-    $url = "https://localhost:3687/api/CHUNZU/2.0/myps/Sensor/Rows/machine_status_sum?uid=@sapido@PaaS";
+    global $publicIP,$publicPort;
+    $url = "https://" . $publicIP . ":" . $publicPort. "/api/CHUNZU/2.0/myps/Sensor/Rows/machine_status_sum?uid=@sapido@PaaS";
     $data = $push_data;
     
     $options = array(

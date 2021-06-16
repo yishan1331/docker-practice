@@ -1,14 +1,8 @@
 <?php
 function MainQuery($params)//主要查詢按鈕
 {
-    // $test = json_decode('{"QueryTableData":[{"abn_species":{"data":{"安全門未關":{"data":[1]},"過負載異常":{"data":[5]},"挾料台浮動":{"data":[1]}},"data_time":["2021年01月"]},"device_detail_data":[{"alarmCode":"E_MC0005","alarmDetail":"安全門未關","alarmVideo":"","startTime":"2021-01-13 10:33:43","endTime":"2021-01-13 10:34:03","continuousTime":"00:00:20"},{"alarmCode":"E_MC0003","alarmDetail":"過負載異常","alarmVideo":"","startTime":"2021-01-14 22:28:08","endTime":"2021-01-14 22:36:18","continuousTime":"00:08:10"},{"alarmCode":"E_MC0003","alarmDetail":"過負載異常","alarmVideo":"","startTime":"2021-01-14 22:50:36","endTime":"2021-01-14 22:50:38","continuousTime":"00:00:02"},{"alarmCode":"E_MC0003","alarmDetail":"過負載異常","alarmVideo":"","startTime":"2021-01-15 00:01:25","endTime":"2021-01-15 00:01:27","continuousTime":"00:00:02"},{"alarmCode":"E_MC0003","alarmDetail":"過負載異常","alarmVideo":"","startTime":"2021-01-15 07:45:08","endTime":"2021-01-15 07:45:33","continuousTime":"00:00:25"},{"alarmCode":"E_MC0003","alarmDetail":"過負載異常","alarmVideo":"","startTime":"2021-01-15 11:55:05","endTime":"2021-01-15 12:02:49","continuousTime":"00:07:44"},{"alarmCode":"E_MC0014","alarmDetail":"挾料台浮動","alarmVideo":"","startTime":"2021-01-20 15:16:04","endTime":"2021-01-20 15:16:09","continuousTime":"00:00:05"}],"query_date":["2021-01-13 00:00:00","2021-01-25 23:59:59","CBP136L","F01"]}],"Response":"ok"}', true);
-    // return $test;
-    if ($params->deviceID == 'F01') {
-        $params->deviceID = 'test_main';
-    }
-    $device_name = $params->deviceID;
-    // $start_date_time = date("Y-m-d 08:00:00", strtotime($params->startTime));
-    // $end_date_time = date("Y-m-d 08:00:00", strtotime($params->endTime));
+    $device_id = $params->deviceID;
+
     $query_now_status = false;
     $now_date = date("Y-m-d");
     $now_date_time = date("Y-m-d H:i:s");
@@ -29,11 +23,11 @@ function MainQuery($params)//主要查詢按鈕
         $end_date_time = date("Y-m-d 23:59:59", strtotime($params->endTime)+86400);
     }
 
-    if (isset($device_name)) {
+    if (isset($device_id)) {
         $symbols = new stdClass();
-        $symbols->device_name = ['equal'];
+        $symbols->device_id = ['equal'];
         $whereAttr = new stdClass();
-        $whereAttr->device_name = [$device_name];
+        $whereAttr->device_id = [$device_id];
     }
     $data = array(
         'condition_1' => array(
@@ -57,11 +51,10 @@ function MainQuery($params)//主要查詢按鈕
     $Query_Device_Response = $machine_status_sum['QueryTableData'];
 
     if ($query_now_status == true) {
-        $device_name = $params->deviceID;
-        if ($device_name == 'test_main') {
-            $device_name = 'test_emeter';
-        }
-        $device = CommonSpecificKeyQuery('Redis', $device_name, 'no');
+        $device_id = $params->deviceID;
+        $cus_id = $params->cusID;
+
+        $device = CommonSpecificKeyQuery('Redis', $cus_id . '_' . $device_id, 'no');
         if ($device['Response'] !== 'ok') {
             return $device;
         }
@@ -92,23 +85,51 @@ function MainQuery($params)//主要查詢按鈕
             ),
             'upload_at' => date("Y-m-d", strtotime($now_date_time)+86400)
         ));
-
-        // $Query_Device_data = Query_Device(date("Y-m-d 08:00:00"), $now_date_time, isset($device_name)?$device_name:null, isset($params->process)?$params->process:null);
-        // for ($i=0; $i < count($Query_Device_data); $i++) { 
-        //     $Query_Device_data[$i]['upload_at'] = date("Y-m-d", strtotime($now_date_time)+86400);
-        //     array_push($Query_Device_Response, $Query_Device_data[$i]);
-        // }
     }
 
     //跨日還沒結算前一天的資料，$machine_status_sum，會沒有該日資料
     if (strtotime($now_date_time) < strtotime(date("Y-m-d 08:00:00"))) {
-        //昨天起始時間
-        $before_date_time = date("Y-m-d 08:00:00", strtotime(date("Y-m-d 08:00:00"))-86400);
-        $Query_Before_Device_data = Query_Device($before_date_time, $now_date_time, isset($device_name)?$device_name:null, isset($params->process)?$params->process:null);
-        for ($i=0; $i < count($Query_Before_Device_data); $i++) { 
-            $Query_Before_Device_data[$i]['upload_at'] = date("Y-m-d", strtotime($now_date_time)+86400);
-            array_push($Query_Device_Response, $Query_Before_Device_data[$i]);
+        $device_id = $params->deviceID;
+        $cus_id = $params->cusID;
+
+        $device = CommonSpecificKeyQuery('Redis', $cus_id . '_' . $device_id, 'no');
+        if ($device['Response'] !== 'ok') {
+            return $device;
         }
+        $this_device_data = $device['QueryValueData'];
+        $operatelog_information = $this_device_data['operatelog_information'];
+        $alarmHistory_detail = array();
+        if (!empty($operatelog_information)) {
+            if (is_string($operatelog_information)) {
+                $operatelog_information = json_decode($operatelog_information, true);
+            }
+            foreach ($operatelog_information as $key => $value) {
+                if ($value['status'] == '警報') {
+                    array_push($alarmHistory_detail, array(
+                        'machine_abn_description' => $value['alarmDetail'],
+                        'machine_abn_id' => $value['alarmCode'],
+                        'timestamp' => [$value['startTime'], $value['endTime']]
+                    ));
+                }
+            }
+        }
+
+        array_push($Query_Device_Response, array(
+            'device_name' => $params->deviceID,
+            'machine_detail' => array(
+                'H' => array(
+                    'datail' => $alarmHistory_detail
+                )
+            ),
+            'upload_at' => date("Y-m-d", strtotime($now_date_time)+86400)
+        ));
+        // //昨天起始時間
+        // $before_date_time = date("Y-m-d 08:00:00", strtotime(date("Y-m-d 08:00:00"))-86400);
+        // $Query_Before_Device_data = Query_Device($before_date_time, $now_date_time, isset($device_name)?$device_name:null, isset($params->process)?$params->process:null);
+        // for ($i=0; $i < count($Query_Before_Device_data); $i++) { 
+        //     $Query_Before_Device_data[$i]['upload_at'] = date("Y-m-d", strtotime($now_date_time)+86400);
+        //     array_push($Query_Device_Response, $Query_Before_Device_data[$i]);
+        // }
     }
 
     if (empty($Query_Device_Response)) {
@@ -116,10 +137,23 @@ function MainQuery($params)//主要查詢按鈕
         return $returnData;
     }
 
-    // $device_data = array(
-    //     'data' => [],
-    //     'data_time' => []
-    // );
+    $query_error_level = new apiJsonBody_query;
+    $query_error_level->setFields(['err_level', 'name']);
+    $query_error_level->setTable('error_level');
+    $query_error_level->setLimit(["ALL"]);
+    $query_error_level_data = $query_error_level->getApiJsonBody();
+    $error_level = CommonSqlSyntax_Query($query_error_level_data, "MySQL", "no");
+    if ($error_level['Response'] !== 'ok') {
+        $error_level_data = [];
+    } else {
+        $error_level_data = $error_level['QueryTableData'];
+    }
+
+    $level_data = array();
+    foreach ($error_level_data as $key => $value) {
+        $level_data[$value['err_level']] = $value['name'];
+    }
+    
     $abn_species = array(
         'data' => [],
         'data_time' => []   
@@ -137,49 +171,42 @@ function MainQuery($params)//主要查詢按鈕
         $position = array_search($this_data_time[0] . '年' . $this_data_time[1] . '月', $abn_species['data_time']);
 
         foreach ($status_value['machine_detail']['H']['datail'] as $err_key => $err_value) {
-            if (empty(strpos($err_value['machine_abn_id'], 'MC_0'))) {
-                // $device_data['data'][$status_value['device_name']]['data'][$position]++;
-                if (empty(strpos($err_value['machine_abn_description'], ','))) {
-                    $abn_description_value = $err_value['machine_abn_description'];
-                    if (!isset($abn_species['data'][$abn_description_value])) {
-                        $abn_species['data'][$abn_description_value] = array('data' => array());
-                        array_push($abn_species['data'][$abn_description_value]['data'],0);
+            $this_machine_abn_id = $err_value['machine_abn_id'];
+            $this_machine_abn_description = $err_value['machine_abn_description'];
+            $machine_abn_id_array = explode("\n", $this_machine_abn_id);
+            $machine_abn_description_array = explode("\n", $this_machine_abn_description);
+            $alarmLevel = '-';
+            $max_level = 0;
+            foreach ($machine_abn_id_array as $machine_abn_id_key => $machine_abn_id_value) {
+                if (empty(strpos($machine_abn_id_value, '0_'))) {
+                    if (!isset($abn_species['data'][$machine_abn_description_array[$machine_abn_id_key]])) {
+                        $abn_species['data'][$machine_abn_description_array[$machine_abn_id_key]] = array('data' => array());
+                        array_push($abn_species['data'][$machine_abn_description_array[$machine_abn_id_key]]['data'],0);
                     }
-                    if (!isset($abn_species['data'][$abn_description_value]['data'][$position])) {
-                        $abn_species['data'][$abn_description_value]['data'][$position] = 0;
+                    if (!isset($abn_species['data'][$machine_abn_description_array[$machine_abn_id_key]]['data'][$position])) {
+                        $abn_species['data'][$machine_abn_description_array[$machine_abn_id_key]]['data'][$position] = 0;
                     }
-                    $abn_species['data'][$abn_description_value]['data'][$position]++;
-                    $err_value['machine_abn_id'] = array($err_value['machine_abn_id']);
-                    $err_value['machine_abn_description'] = array($err_value['machine_abn_description']);
-                } else {
-                    $err_value['machine_abn_id'] = explode(",", $err_value['machine_abn_id']);
-                    $machine_abn_description = explode(",", $err_value['machine_abn_description']);
-                    $err_value['machine_abn_description'] = $machine_abn_description;
-                    foreach ($machine_abn_description as $abn_description_key => $abn_description_value) {
-                        if (!isset($abn_species['data'][$abn_description_value])) {
-                            $abn_species['data'][$abn_description_value] = array('data' => array());
-                            array_push($abn_species['data'][$abn_description_value]['data'],0);
-                        }
-                        if (!isset($abn_species['data'][$abn_description_value]['data'][$position])) {
-                            $abn_species['data'][$abn_description_value]['data'][$position] = 0;
-                        }
-                        $abn_species['data'][$abn_description_value]['data'][$position]++;
+                    $abn_species['data'][$machine_abn_description_array[$machine_abn_id_key]]['data'][$position]++;
+
+                    $this_level = explode('_', $machine_abn_id_value)[0];
+                    if ($max_level < $this_level) {
+                        $max_level = $this_level;
                     }
                 }
-    
+            }
+            if ($max_level != 0) {
+                if (isset($level_data[$max_level])) {
+                    $alarmLevel = $level_data[$max_level];
+                }
+
                 $durationTime = TimeSubtraction($err_value['timestamp'][0], $err_value['timestamp'][1], 'hour');
-    
+                
                 $err_startTime = substr($err_value['timestamp'][0], 0, 19);
                 $err_endTime = substr($err_value['timestamp'][1], 0, 19);
-                array_push($err_time, array($err_startTime, $err_endTime));
-                //警報履歷表格資料
                 array_push($device_detail_data, array(
-                    // 'device' => $status_value['device_name'],
-                    // 'placeItem' => '二廠',
-                    // 'groupItem' => '成四組',
-                    // 'classItem' => '日班',
-                    'alarmCode' => implode("\n", $err_value['machine_abn_id']),
-                    'alarmDetail' => implode("\n", $err_value['machine_abn_description']),
+                    'alarmLevel' => $alarmLevel,
+                    'alarmCode' => $this_machine_abn_id,
+                    'alarmDetail' => $this_machine_abn_description,
                     'alarmVideo' => '',
                     'startTime' => $err_startTime,
                     'endTime' => $err_endTime,
@@ -195,58 +222,65 @@ function MainQuery($params)//主要查詢按鈕
         if ($abn_col_lenght != count($abn_data['data'])) {
             for ($i=0; $i < $abn_col_lenght; $i++) { 
                 if (!isset($abn_data['data'][$i])) {
-                    // return $i;
-                    // return $abn_name;
                     $abn_species['data'][$abn_name]['data'][$i] = 0;
                 }
             }
         }
     }
 
-    // if (!empty($err_time)) {
-    //     $whereAttr = new stdClass();
-    //     $whereAttr->device_name = [$device_name];
-    //     $symbols = new stdClass();
-    //     $symbols->device_name = ['equal'];
-    //     $data = array(
-    //         'condition_1' => array(
-    //             'intervaltime' => array('alarm_time' => $err_time),
-    //             'table' => 'machine_alarm_video',
-    //             'where' => isset($whereAttr)?$whereAttr:'',
-    //             'limit' => ['ALL'],
-    //             'symbols' => isset($symbols)?$symbols:''
-    //         )
-    //     );
-    //     $machine_alarm_video = CommonSqlSyntax_Query_v2_5($data, "PostgreSQL");
-    //     if ($machine_alarm_video['Response'] !== 'ok') {
-    //         $returnData['err_message'] = 'alarm_video is not defined';
-    //         $machine_alarm_video['QueryTableData'] = [];
-    //         // return [[],[]];
-    //     } else if (count($machine_alarm_video['QueryTableData']) == 0) {
-    //         // return [[],[]];
-    //     }
-    //     $machine_alarm_video = $machine_alarm_video['QueryTableData'];
-    // }
-
-    // if (count($device_detail_data) == 0) {
-    //     $returnData['Response'] = '當日無異常資料';
-    //     return  $returnData;
-    // } else {
-    //     if (isset($machine_alarm_video)) {
-    //         foreach ($machine_alarm_video as $alarm_video_key => $alarm_video_value) {
-    //             if (in_array(substr($alarm_video_value['alarm_time'], 0, 19), array_column($device_detail_data, 'startTime'))) {
-    //                 $device_detail_dataPosition = array_search(substr($alarm_video_value['alarm_time'], 0, 19), array_column($device_detail_data, 'startTime'));
-    //                 $device_detail_data[$device_detail_dataPosition]['alarmVideo'] = $alarm_video_value['video_name'];
-    //             }
-    //         }
-    //     }
-    // }
-    // $returnData['QueryTableData'][0]['device_data'] = $device_data;
     $returnData['QueryTableData'][0]['abn_species'] = $abn_species;
     $returnData['QueryTableData'][0]['device_detail_data'] = $device_detail_data;
-    $returnData['QueryTableData'][0]['query_date'] = [$params->startTime, $params->endTime, $params->model, $params->deviceID == 'test_main' ? 'F01' : $params->deviceID];
     $returnData['Response'] = 'ok';
     return  $returnData;
+}
+
+function SelectOption($params)
+{
+    //回傳的資料
+    $returnData['QueryTableData'] = [];
+    $cus_id = $params->cusID;
+    //查詢所有機台
+    $device = CommonSpecificKeyQuery('Redis', $cus_id . '_*', 'yes');
+    if ($device['Response'] !== 'ok') {
+        return;
+    }
+    $device_data = $device['QueryValueData'];
+
+    $model_array = array();
+    $device_array = array();
+    foreach ($device_data as $key => $value) {
+        $this_device_model = $value['device_model'];
+        $this_device_id = $value['device_id'];
+        $this_device_name = $value['device_name'];
+        if (gettype(array_search($this_device_model.'', array_column($model_array, 'value'))) == 'boolean') {
+            array_push($model_array, array(
+                'value' => $this_device_model,
+                'text' => $this_device_model,
+            ));
+        }
+        if (!isset($device_array[$this_device_model])) {
+            $device_array[$this_device_model] = array();
+        }
+        array_push($device_array[$this_device_model], array(
+            'value' => $this_device_id,
+            'text' => $this_device_name,
+        ));
+    }
+    sort($model_array);
+    foreach ($device_array as $key => $value) {
+        usort($device_array[$key], 'sort_device');
+    }
+    array_push($returnData['QueryTableData'], array(
+        'model' => $model_array,
+        'device' => $device_array
+    ));
+
+    $returnData['Response'] = 'ok';
+    return $returnData;
+}
+
+function sort_device($a, $b){
+    return ($a['value'] > $b['value']) ? 1 : -1;
 }
 
 

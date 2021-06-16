@@ -1,13 +1,7 @@
 <?php
 function MainQuery($params)//主要查詢按鈕
 {
-    // $test = json_decode('{"QueryTableData":[{"total_data":[{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"關機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 08:00:00","endTime":"2021-01-14 11:58:48","durationTime":"03:58:48"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 11:58:48","endTime":"2021-01-14 12:24:50","durationTime":"00:26:02"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 12:24:50","endTime":"2021-01-14 12:27:08","durationTime":"00:02:18"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 12:27:08","endTime":"2021-01-14 12:28:57","durationTime":"00:01:49"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 12:28:57","endTime":"2021-01-14 12:30:44","durationTime":"00:01:47"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 12:30:44","endTime":"2021-01-14 12:33:04","durationTime":"00:02:20"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 12:33:04","endTime":"2021-01-14 12:39:58","durationTime":"00:06:54"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 12:39:58","endTime":"2021-01-14 13:27:08","durationTime":"00:47:10"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 13:27:08","endTime":"2021-01-14 13:28:40","durationTime":"00:01:32"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 13:28:40","endTime":"2021-01-14 13:29:03","durationTime":"00:00:23"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 13:29:03","endTime":"2021-01-14 13:34:10","durationTime":"00:05:07"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"關機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 13:34:10","endTime":"2021-01-14 14:05:53","durationTime":"00:31:43"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 14:05:53","endTime":"2021-01-14 14:08:28","durationTime":"00:02:35"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 14:08:28","endTime":"2021-01-14 15:05:22","durationTime":"00:56:54"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 15:05:22","endTime":"2021-01-14 18:40:14","durationTime":"03:34:52"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 18:40:14","endTime":"2021-01-14 18:41:49","durationTime":"00:01:35"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 18:41:49","endTime":"2021-01-14 19:04:30","durationTime":"00:22:41"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:04:30","endTime":"2021-01-14 19:43:54","durationTime":"00:39:24"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:43:54","endTime":"2021-01-14 19:46:55","durationTime":"00:03:01"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:46:55","endTime":"2021-01-14 19:47:22","durationTime":"00:00:27"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:47:22","endTime":"2021-01-14 19:49:14","durationTime":"00:01:52"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:49:14","endTime":"2021-01-14 19:50:25","durationTime":"00:01:11"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:50:25","endTime":"2021-01-14 19:52:31","durationTime":"00:02:06"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:52:31","endTime":"2021-01-14 19:53:04","durationTime":"00:00:33"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:53:04","endTime":"2021-01-14 19:54:23","durationTime":"00:01:19"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:54:23","endTime":"2021-01-14 19:54:52","durationTime":"00:00:29"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:54:52","endTime":"2021-01-14 19:55:34","durationTime":"00:00:42"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 19:55:34","endTime":"2021-01-14 20:29:11","durationTime":"00:33:37"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 20:29:11","endTime":"2021-01-14 21:19:14","durationTime":"00:50:03"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 21:19:14","endTime":"2021-01-14 21:20:09","durationTime":"00:00:55"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 21:20:09","endTime":"2021-01-14 21:28:34","durationTime":"00:08:25"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 21:28:34","endTime":"2021-01-14 22:28:08","durationTime":"00:59:34"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"警報","alarmCode":"E_MC0003","alarmDetail":"過負載異常","startTime":"2021-01-14 22:28:08","endTime":"2021-01-14 22:36:18","durationTime":"00:08:10"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 22:36:18","endTime":"2021-01-14 22:50:29","durationTime":"00:14:11"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 22:50:29","endTime":"2021-01-14 22:50:36","durationTime":"00:00:07"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"警報","alarmCode":"E_MC0003","alarmDetail":"過負載異常","startTime":"2021-01-14 22:50:36","endTime":"2021-01-14 22:50:38","durationTime":"00:00:02"},
-    // {"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 22:50:38","endTime":"2021-01-14 23:08:10","durationTime":"00:17:32"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 23:08:10","endTime":"2021-01-14 23:11:08","durationTime":"00:02:58"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 23:11:08","endTime":"2021-01-14 23:15:40","durationTime":"00:04:32"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 23:15:40","endTime":"2021-01-14 23:32:34","durationTime":"00:16:54"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-14 23:32:34","endTime":"2021-01-15 00:01:21","durationTime":"00:28:47"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:01:21","endTime":"2021-01-15 00:01:25","durationTime":"00:00:04"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"警報","alarmCode":"E_MC0003","alarmDetail":"過負載異常","startTime":"2021-01-15 00:01:25","endTime":"2021-01-15 00:01:27","durationTime":"00:00:02"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:01:27","endTime":"2021-01-15 00:01:30","durationTime":"00:00:03"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:01:30","endTime":"2021-01-15 00:21:48","durationTime":"00:20:18"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:21:48","endTime":"2021-01-15 00:41:39","durationTime":"00:19:51"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:41:39","endTime":"2021-01-15 00:42:47","durationTime":"00:01:08"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:42:47","endTime":"2021-01-15 00:53:03","durationTime":"00:10:16"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:53:03","endTime":"2021-01-15 00:53:15","durationTime":"00:00:12"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 00:53:15","endTime":"2021-01-15 01:30:07","durationTime":"00:36:52"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 01:30:07","endTime":"2021-01-15 01:31:06","durationTime":"00:00:59"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 01:31:06","endTime":"2021-01-15 01:32:29","durationTime":"00:01:23"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 01:32:29","endTime":"2021-01-15 01:36:47","durationTime":"00:04:18"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 01:36:47","endTime":"2021-01-15 02:06:41","durationTime":"00:29:54"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 02:06:41","endTime":"2021-01-15 02:12:59","durationTime":"00:06:18"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 02:12:59","endTime":"2021-01-15 07:39:49","durationTime":"05:26:50"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 07:39:49","endTime":"2021-01-15 07:42:45","durationTime":"00:02:56"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 07:42:45","endTime":"2021-01-15 07:43:00","durationTime":"00:00:15"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"生產","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 07:43:00","endTime":"2021-01-15 07:45:08","durationTime":"00:02:08"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"警報","alarmCode":"E_MC0003","alarmDetail":"過負載異常","startTime":"2021-01-15 07:45:08","endTime":"2021-01-15 07:45:33","durationTime":"00:00:25"},{"device_name":"F08","place_item":"二廠","group_item":"組別","class_item":"日班","status":"待機","alarmCode":"","alarmDetail":"","startTime":"2021-01-15 07:45:33","endTime":"2021-01-15 07:59:50","durationTime":"00:14:17"}],"machine_data":{"F08":[{"status":"關機","alarmDetail":"","startTime":"2021-01-14 08:00:00","endTime":"2021-01-14 11:58:48","duration_number":14328},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 11:58:48","endTime":"2021-01-14 12:24:50","duration_number":1562},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 12:24:50","endTime":"2021-01-14 12:27:08","duration_number":138},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 12:27:08","endTime":"2021-01-14 12:28:57","duration_number":109},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 12:28:57","endTime":"2021-01-14 12:30:44","duration_number":107},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 12:30:44","endTime":"2021-01-14 12:33:04","duration_number":140},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 12:33:04","endTime":"2021-01-14 12:39:58","duration_number":414},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 12:39:58","endTime":"2021-01-14 13:27:08","duration_number":2830},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 13:27:08","endTime":"2021-01-14 13:28:40","duration_number":92},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 13:28:40","endTime":"2021-01-14 13:29:03","duration_number":23},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 13:29:03","endTime":"2021-01-14 13:34:10","duration_number":307},{"status":"關機","alarmDetail":"","startTime":"2021-01-14 13:34:10","endTime":"2021-01-14 14:05:53","duration_number":1903},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 14:05:53","endTime":"2021-01-14 14:08:28","duration_number":155},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 14:08:28","endTime":"2021-01-14 15:05:22","duration_number":3414},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 15:05:22","endTime":"2021-01-14 18:40:14","duration_number":12892},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 18:40:14","endTime":"2021-01-14 18:41:49","duration_number":95},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 18:41:49","endTime":"2021-01-14 19:04:30","duration_number":1361},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 19:04:30","endTime":"2021-01-14 19:43:54","duration_number":2364},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 19:43:54","endTime":"2021-01-14 19:46:55","duration_number":181},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 19:46:55","endTime":"2021-01-14 19:47:22","duration_number":27},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 19:47:22","endTime":"2021-01-14 19:49:14","duration_number":112},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 19:49:14","endTime":"2021-01-14 19:50:25","duration_number":71},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 19:50:25","endTime":"2021-01-14 19:52:31","duration_number":126},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 19:52:31","endTime":"2021-01-14 19:53:04","duration_number":33},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 19:53:04","endTime":"2021-01-14 19:54:23","duration_number":79},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 19:54:23","endTime":"2021-01-14 19:54:52","duration_number":29},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 19:54:52","endTime":"2021-01-14 19:55:34","duration_number":42},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 19:55:34","endTime":"2021-01-14 20:29:11","duration_number":2017},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 20:29:11","endTime":"2021-01-14 21:19:14","duration_number":3003},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 21:19:14","endTime":"2021-01-14 21:20:09","duration_number":55},
-    // {"status":"待機","alarmDetail":"","startTime":"2021-01-14 21:20:09","endTime":"2021-01-14 21:28:34","duration_number":505},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 21:28:34","endTime":"2021-01-14 22:28:08","duration_number":3574},{"status":"警報","alarmDetail":"過負載異常","startTime":"2021-01-14 22:28:08","endTime":"2021-01-14 22:36:18","duration_number":490},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 22:36:18","endTime":"2021-01-14 22:50:29","duration_number":851},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 22:50:29","endTime":"2021-01-14 22:50:36","duration_number":7},{"status":"警報","alarmDetail":"過負載異常","startTime":"2021-01-14 22:50:36","endTime":"2021-01-14 22:50:38","duration_number":2},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 22:50:38","endTime":"2021-01-14 23:08:10","duration_number":1052},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 23:08:10","endTime":"2021-01-14 23:11:08","duration_number":178},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 23:11:08","endTime":"2021-01-14 23:15:40","duration_number":272},{"status":"生產","alarmDetail":"","startTime":"2021-01-14 23:15:40","endTime":"2021-01-14 23:32:34","duration_number":1014},{"status":"待機","alarmDetail":"","startTime":"2021-01-14 23:32:34","endTime":"2021-01-15 00:01:21","duration_number":1727},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 00:01:21","endTime":"2021-01-15 00:01:25","duration_number":4},{"status":"警報","alarmDetail":"過負載異常","startTime":"2021-01-15 00:01:25","endTime":"2021-01-15 00:01:27","duration_number":2},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 00:01:27","endTime":"2021-01-15 00:01:30","duration_number":3},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 00:01:30","endTime":"2021-01-15 00:21:48","duration_number":1218},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 00:21:48","endTime":"2021-01-15 00:41:39","duration_number":1191},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 00:41:39","endTime":"2021-01-15 00:42:47","duration_number":68},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 00:42:47","endTime":"2021-01-15 00:53:03","duration_number":616},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 00:53:03","endTime":"2021-01-15 00:53:15","duration_number":12},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 00:53:15","endTime":"2021-01-15 01:30:07","duration_number":2212},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 01:30:07","endTime":"2021-01-15 01:31:06","duration_number":59},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 01:31:06","endTime":"2021-01-15 01:32:29","duration_number":83},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 01:32:29","endTime":"2021-01-15 01:36:47","duration_number":258},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 01:36:47","endTime":"2021-01-15 02:06:41","duration_number":1794},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 02:06:41","endTime":"2021-01-15 02:12:59","duration_number":378},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 02:12:59","endTime":"2021-01-15 07:39:49","duration_number":19610},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 07:39:49","endTime":"2021-01-15 07:42:45","duration_number":176},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 07:42:45","endTime":"2021-01-15 07:43:00","duration_number":15},{"status":"生產","alarmDetail":"","startTime":"2021-01-15 07:43:00","endTime":"2021-01-15 07:45:08","duration_number":128},{"status":"警報","alarmDetail":"過負載異常","startTime":"2021-01-15 07:45:08","endTime":"2021-01-15 07:45:33","duration_number":25},{"status":"待機","alarmDetail":"","startTime":"2021-01-15 07:45:33","endTime":"2021-01-15 07:59:50","duration_number":857}]},"query_date":["2021-01-14 00:00:00","CBP136L","F01"]}],"Response":"ok"}', true);
-    // return $test;
-    if ($params->deviceID == 'F01') {
-        $params->deviceID = 'test_main';
-    }
+    $device_id = $params->deviceID;
 
     $now_date = date("Y-m-d H:i:s");//今天的日期
     // 如果日期包含今天，結束日期為今天日期
@@ -24,26 +18,24 @@ function MainQuery($params)//主要查詢按鈕
             $start_date_time = date("Y-m-d 08:00:00", strtotime(date("Y-m-d 08:00:00"))-86400);
             $end_date_time = $now_date;
         }
-        $device_name = $params->deviceID;
-        if ($device_name == 'test_main') {
-            $device_name = 'test_emeter';
-        }
-        $device = CommonSpecificKeyQuery('Redis', $device_name, 'no');
+
+        $cus_id = $params->cusID;
+        $device = CommonSpecificKeyQuery('Redis', $cus_id . '_' . $device_id, 'no');
         if ($device['Response'] !== 'ok') {
             return;
         }
         $this_device_data = $device['QueryValueData'];
 
-        $stack_bar_information = array($device_name => $this_device_data['stack_bar_information']);
-        if (!empty($stack_bar_information[$device_name])) {
-            if (is_string($stack_bar_information[$device_name])) {
-                $stack_bar_information[$device_name] = json_decode($stack_bar_information[$device_name], true);
+        $stack_bar_information = array($device_id => $this_device_data['stack_bar_information']);
+        if (!empty($stack_bar_information[$device_id])) {
+            if (is_string($stack_bar_information[$device_id])) {
+                $stack_bar_information[$device_id] = json_decode($stack_bar_information[$device_id], true);
             }
         } else {
-            $stack_bar_information = array($device_name => array());
+            $stack_bar_information = array($device_id => array());
             if (strtotime(date("Y-m-d H:i:s")) > strtotime(date("Y-m-d 08:00:00"))) {
                 $durationTime = TimeSubtraction(date("Y-m-d 08:00:00"), date("Y-m-d H:i:s"), 'hour');
-                array_push($stack_bar_information[$device_name], array(
+                array_push($stack_bar_information[$device_id], array(
                     'status' => null,
                     'alarmDetail' => '',
                     'startTime' =>  date("Y-m-d 08:00:00"),
@@ -52,7 +44,7 @@ function MainQuery($params)//主要查詢按鈕
                 ));
             } else {
                 $durationTime = TimeSubtraction(date("Y-m-d H:i:s", strtotime(date("Y-m-d 08:00:00")-86400)), date("Y-m-d H:i:s"), 'hour');
-                array_push($stack_bar_information[$device_name], array(
+                array_push($stack_bar_information[$device_id], array(
                     'status' => null,
                     'alarmDetail' => '',
                     'startTime' =>  date("Y-m-d H:i:s", strtotime(date("Y-m-d 08:00:00")-86400)),
@@ -98,9 +90,9 @@ function MainQuery($params)//主要查詢按鈕
         $end_date_time = date("Y-m-d 08:00:00", strtotime($params->startTime) + 172800);
         if (isset($params->deviceID)) {
             $symbols = new stdClass();
-            $symbols->device_name = ['equal'];
+            $symbols->device_id = ['equal'];
             $whereAttr = new stdClass();
-            $whereAttr->device_name = [$params->deviceID];
+            $whereAttr->device_id = [$params->deviceID];
         }
         $data = array(
             'condition_1' => array(
@@ -124,9 +116,9 @@ function MainQuery($params)//主要查詢按鈕
     $operatelog_data = array('total_data'=>[], 'machine_data'=>[]);
     if(!empty($Query_Device_Response)) {
         for ($i=0; $i < count($Query_Device_Response); $i++) { 
-            $device_name = $Query_Device_Response[$i]['device_name'];
-            if (!isset($operatelog_data['machine_data'][$device_name])) {
-                $operatelog_data['machine_data'][$device_name] = [];
+            $device_id = $Query_Device_Response[$i]['device_id'];
+            if (!isset($operatelog_data['machine_data'][$device_id])) {
+                $operatelog_data['machine_data'][$device_id] = [];
             }
             foreach ($Query_Device_Response[$i]['machine_detail'] as $status => $value) {
                 // echo json_encode($value['datail']);
@@ -144,7 +136,7 @@ function MainQuery($params)//主要查詢按鈕
                         }
                     }
                     array_push($operatelog_data['total_data'], array(
-                        'device_name' => $device_name,
+                        'device_id' => $device_id,
                         'place_item' => '二廠',
                         'group_item' => '組別',
                         'class_item' => '日班',
@@ -155,7 +147,7 @@ function MainQuery($params)//主要查詢按鈕
                         'endTime' => $endTime,
                         'durationTime' => $durationTime[0]
                     ));
-                    array_push($operatelog_data['machine_data'][$device_name], array(
+                    array_push($operatelog_data['machine_data'][$device_id], array(
                         'status' => $status == 'S' ? '關機' : ($status == 'H' ? '警報' : ($status == 'R' ? '生產' : ($status == 'Q' ? '待機' : ''))),
                         // 'alarmCode' => isset($datail['machine_abn_id'])?implode("\n",$datail['machine_abn_id']):'',
                         'alarmDetail' => isset($datail['machine_abn_description'])?implode("\n",$datail['machine_abn_description']):'',
@@ -164,20 +156,20 @@ function MainQuery($params)//主要查詢按鈕
                         'duration_number' => $durationTime[2]
                     ));
                 }
-                usort($operatelog_data['machine_data'][$device_name], 'sort_start_time');
+                usort($operatelog_data['machine_data'][$device_id], 'sort_start_time');
                 usort($operatelog_data['total_data'], 'sort_start_time');
             }
-            if (count($operatelog_data['machine_data'][$device_name]) > 0) {
-                if ($operatelog_data['machine_data'][$device_name][count($operatelog_data['machine_data'][$device_name])-1]['status'] == '關機' && $operatelog_data['machine_data'][$device_name][count($operatelog_data['machine_data'][$device_name])-1]['duration_number'] < 60) {
+            if (count($operatelog_data['machine_data'][$device_id]) > 0) {
+                if ($operatelog_data['machine_data'][$device_id][count($operatelog_data['machine_data'][$device_id])-1]['status'] == '關機' && $operatelog_data['machine_data'][$device_id][count($operatelog_data['machine_data'][$device_id])-1]['duration_number'] < 60) {
                     array_pop($operatelog_data['total_data']);
-                    array_pop($operatelog_data['machine_data'][$device_name]);
+                    array_pop($operatelog_data['machine_data'][$device_id]);
                 }
             } else {
                 $startTime = $time_interval['start'];
                 $endTime = date("Y-m-d H:i:s", $now_time);
                 $durationTime = TimeSubtraction($startTime, $endTime, 'hour');
                 array_push($operatelog_data['total_data'], array(
-                    'device_name' => $device_name,
+                    'device_id' => $device_id,
                     'place_item' => '二廠',
                     'group_item' => '組別',
                     'class_item' => '日班',
@@ -188,7 +180,7 @@ function MainQuery($params)//主要查詢按鈕
                     'endTime' => $endTime,
                     'durationTime' => $durationTime[0]
                 ));
-                array_push($operatelog_data['machine_data'][$device_name], array(
+                array_push($operatelog_data['machine_data'][$device_id], array(
                     'status' => '關機',
                     'alarmDetail' => '',
                     'startTime' =>  $startTime,
@@ -207,12 +199,60 @@ function MainQuery($params)//主要查詢按鈕
     //排序
     usort($operatelog_data['total_data'], 'sort_start_time');
 
-    $operatelog_data['query_date'] = [$params->startTime, $params->model, $params->deviceID == 'test_main' ? 'F01' : $params->deviceID];
     $returnData['QueryTableData'] = [$operatelog_data];
     // $returnData['test'] = $test;
     $returnData['Response'] = 'ok';
 
     return $returnData;
+}
+
+function SelectOption($params)
+{
+    //回傳的資料
+    $returnData['QueryTableData'] = [];
+    $cus_id = $params->cusID;
+    //查詢所有機台
+    $device = CommonSpecificKeyQuery('Redis', $cus_id . '_*', 'yes');
+    if ($device['Response'] !== 'ok') {
+        return;
+    }
+    $device_data = $device['QueryValueData'];
+
+    $model_array = array();
+    $device_array = array();
+    foreach ($device_data as $key => $value) {
+        $this_device_model = $value['device_model'];
+        $this_device_id = $value['device_id'];
+        $this_device_name = $value['device_name'];
+        if (gettype(array_search($this_device_model.'', array_column($model_array, 'value'))) == 'boolean') {
+            array_push($model_array, array(
+                'value' => $this_device_model,
+                'text' => $this_device_model,
+            ));
+        }
+        if (!isset($device_array[$this_device_model])) {
+            $device_array[$this_device_model] = array();
+        }
+        array_push($device_array[$this_device_model], array(
+            'value' => $this_device_id,
+            'text' => $this_device_name,
+        ));
+    }
+    sort($model_array);
+    foreach ($device_array as $key => $value) {
+        usort($device_array[$key], 'sort_device');
+    }
+    array_push($returnData['QueryTableData'], array(
+        'model' => $model_array,
+        'device' => $device_array
+    ));
+
+    $returnData['Response'] = 'ok';
+    return $returnData;
+}
+
+function sort_device($a, $b){
+    return ($a['value'] > $b['value']) ? 1 : -1;
 }
 
 function Query_Device($startTime, $endTime, $select_device_name = null, $process = 5) {

@@ -2,6 +2,7 @@
 //機台狀態、燈號、支數、運轉日誌、堆疊圖
 date_default_timezone_set("Asia/Taipei");
 
+include(dirname(__FILE__) . "/../globalvar.php");
 include(dirname(__FILE__) . "/../api.php");
 include(dirname(__FILE__) . "/../connection.php");
 include(dirname(__FILE__) . "/../apiJsonBody.php");

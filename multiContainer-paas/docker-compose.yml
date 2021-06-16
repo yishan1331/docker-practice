@@ -136,12 +136,13 @@ services:
             # - paas-uwsgi-sock:/var/www/spdpaas/run/
             - paas-data:/var/www/spdpaas/src/
             - api-html:/var/www/html/API:rw
-        command:
-            [
-                "/bin/sh",
-                "-c",
-                "/wait-for-it.sh mysql:3306 postgres:5432 redis:6379 -t 10 -- uwsgi -i spdpaas_uwsgi.ini",
-            ]
+            - paas-dashboard:/var/www/spdpaas/dashboard:rw
+        # command:
+        #     [
+        #         "/bin/sh",
+        #         "-c",
+        #         "/wait-for-it.sh mysql:3306 postgres:5432 redis:6379 -t 10 -- uwsgi -i spdpaas_uwsgi.ini",
+        #     ]
         sysctls:
             - net.core.somaxconn=32678
         restart: always
@@ -236,7 +237,8 @@ services:
         volumes:
             # - ./wait-for-it.sh:/wait-for-it.sh
             - ${PWD}/${DATA_DIR}/${CELERY_LOG_DIR}:/var/log/celery/:rw
-            - ${PWD}/${SERVICES_DIR}/flask/www/spdpaas/src/app/globalvar.py:/var/app/globalvar.py:ro
+            - ${PWD}/${SERVICES_DIR}/flask/var/www/spdpaas/src/app/globalvar.py:/var/app/globalvar.py:ro
+            - ${PWD}/${SERVICES_DIR}/flask/var/www/spdpaas/config/constants.conf:/var/app/config.conf:ro
         # command:
         #     [
         #         "/bin/sh",

@@ -12,23 +12,20 @@ ENV LANG=en_US.UTF-8 \
 ENV TZ=Asia/Taipei
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+#加上設定環境變數
 ARG SYSTEMLIST
-ENV systemlist=${SYSTEMLIST}
 ARG CELERYLOG
-ENV celerylog=${CELERYLOG}
 
 RUN apt-get -y update \
     && apt-get install -y vim-gtk less curl cron rsyslog
 
 RUN apt-get -y install redis-server
-# RUN sed -i '56abind 0.0.0.0 ::' /etc/redis/redis.conf #開放遠端連線
-RUN sed -i '69s/bind 127.0.0.1 ::1/bind 0.0.0.0 ::/' /etc/redis/redis.conf #開放遠端連線
-RUN sed -i '113s/timeout 0/timeout 3600/' /etc/redis/redis.conf #修改timeout時間
-RUN sed -i '507s/# requirepass foobared/requirepass sapido/' /etc/redis/redis.conf #修改登入密碼
+COPY redis.conf /etc/redis/redis.conf
 
 # RUN groupadd user && useradd --create-home --home-dir /home/user -g user user
 # WORKDIR /home/user
 COPY var /var
+COPY run /run
 COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
@@ -47,12 +44,13 @@ RUN pip install -r /requirements.txt
 # # --link some-rabbit:rabbit "just works"
 # ENV CELERY_BROKER_URL amqp://guest@rabbit
 RUN chown root:crontab /var/spool/cron/crontabs/root
+RUN chmod +x /var/app/start.sh
 
 WORKDIR /var/app
 
 EXPOSE 6379
 
-ENTRYPOINT [ "./start.sh", "${celerylog}"]
+CMD [ "./start.sh" ]
 
 # USER user
 # CMD celery -A celeryWorker worker -Q L-queue1 --pidfile=/run/celery.pid -l DEBUG --logfile=/var/log/celery/helper.log

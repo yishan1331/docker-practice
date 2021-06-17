@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-import os
+import os, json
 import redis
 from datetime import datetime, timedelta
 
@@ -16,7 +16,14 @@ dbRedis = redis.Redis(connection_pool=POOL)
 
 print("~~~os.environ~~~")
 print(os.environ)
-tempsystemlist = os.environ["systemlist"]
+try:
+    tempsystemlist = json.loads(os.environ["SYSTEMLIST"])
+    if not isinstance(tempsystemlist,list):
+        print("Time:",datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[::],"| Error: 'systemlist' is must be an Array")
+        quit()
+except ValueError as e:
+    print("Time:",datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[::],"| Error: 'systemlist' is must be an Array")
+    quit()
 
 for i in tempsystemlist:
     yesterday = datetime.today() + timedelta(-1)

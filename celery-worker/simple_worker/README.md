@@ -5,7 +5,7 @@
 ##### 4. build images
 `docker build --rm -t celery-worker .`
 ##### 5. run container
-`docker run -dit --name helper -p 7788:6379 --restart=always --env-file=.env celery-worker`
+`docker run -dit --name helper -p 7788:6379 --restart=always --env-file=.env -v helper-redis:/var/lib/redis celery-worker`
 指令 | 意義
 | -------- | -------- 
 | –restart=always | 機器重啟後Container自動重啟（預設是關閉）    

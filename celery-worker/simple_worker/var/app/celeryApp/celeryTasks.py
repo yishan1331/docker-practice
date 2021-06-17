@@ -29,8 +29,7 @@ from celery.utils.log import get_task_logger
 # User level modules
 #=======================================================
 #{{{
-from app import *
-from celeryWorker import app
+from celeryWorker import app, config
 from modules import ConvertData, retrieve_database_exist, create_database, getDbSessionType, checkexisted_api_count_record_table
 #}}}
 

@@ -1,7 +1,10 @@
 from celery import Celery
 
 from celeryConfig import BaseConfig as celeryConfig
-from app import *
+from config import config
+
+print("~~~config~~~")
+print(config)
 
 app = Celery("sapidoPaaS",
     broker="redis://root:{}@{}:{}/{}".format(

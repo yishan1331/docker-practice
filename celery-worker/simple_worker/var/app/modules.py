@@ -40,7 +40,7 @@ warnings.filterwarnings('ignore', category=sa_exc.SAWarning)
 #Yishan 11102020 加入redis in-memory db to store Validity period data
 import redis
 
-from app import *
+from config import config
 #}}}
 
 #=======================================================

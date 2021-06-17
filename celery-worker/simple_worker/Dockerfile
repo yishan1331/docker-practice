@@ -1,7 +1,3 @@
-# FROM ubuntu:16.04
-# LABEL maintainer="yishanjob13@gmail.com"
-
-
 FROM python:2.7
 LABEL maintainer="yishanjob13@gmail.com"
 
@@ -15,6 +11,11 @@ ENV LANG=en_US.UTF-8 \
 #設定時區 https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes/683651
 ENV TZ=Asia/Taipei
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+ARG SYSTEMLIST
+ENV systemlist=${SYSTEMLIST}
+ARG CELERYLOG
+ENV celerylog=${CELERYLOG}
 
 RUN apt-get -y update \
     && apt-get install -y vim-gtk less curl cron rsyslog
@@ -50,6 +51,8 @@ RUN chown root:crontab /var/spool/cron/crontabs/root
 WORKDIR /var/app
 
 EXPOSE 6379
+
+ENTRYPOINT [ "./start.sh", "${celerylog}"]
 
 # USER user
 # CMD celery -A celeryWorker worker -Q L-queue1 --pidfile=/run/celery.pid -l DEBUG --logfile=/var/log/celery/helper.log

@@ -1,46 +1,22 @@
-#-*- coding: utf-8 -*-                                                                                                        
+#-*- coding: utf-8 -*-
 import os
 import redis
-import time
-import ConfigParser
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
-def _readConfig():
-    print "#######_readConfig########"
-    dicConfig = {}
-    try:
-        CONFPATH = "/var/app/config.conf"
+from config import config
 
-        FILECONFIG = ConfigParser.ConfigParser()
-        FILECONFIG.read(CONFPATH)
-
-        dicConfig = {
-            'celery_broker' : FILECONFIG.get('Celery', 'broker'),
-            'postgres_ip' : FILECONFIG.get('Postgres', 'ip'),
-            'postgres_port' : FILECONFIG.get('Postgres', 'port'),
-            'postgres_user' : FILECONFIG.get('Postgres', 'user'),
-            'postgres_pwd' : FILECONFIG.get('Postgres', 'pwd'),
-            'redis_ip' : FILECONFIG.get('Redis', 'ip'),
-            'redis_port' : FILECONFIG.get('Redis', 'port'),
-            'redis_pwd' : FILECONFIG.get('Redis', 'pwd')
-        }
-
-        print "~~~~dicConfig~~~~~"
-        print dicConfig
-
-    except Exception as e:
-        print "~~~~_readConfig error~~~~"
-        print e
-    finally:
-        return dicConfig
-
-dicConfig = _readConfig()
-
-POOL = redis.ConnectionPool(host='{}'.format(dicConfig.get("redis_ip")), port="{}".format(dicConfig.get("redis_port")), db=15,password="{}".format(dicConfig.get("redis_pwd")))
+POOL = redis.ConnectionPool(
+    host=config["DBREDISIp"],
+    port=config["DBREDISPort"],
+    db=config["DBREDISDb"],
+    password=config["DBREDISPassword"]
+)
 
 dbRedis = redis.Redis(connection_pool=POOL)
 
-tempsystemlist = ["IOT","APIDOC","PaaS"]
+print("~~~os.environ~~~")
+print(os.environ)
+tempsystemlist = os.environ["systemlist"]
 
 for i in tempsystemlist:
     yesterday = datetime.today() + timedelta(-1)
@@ -66,7 +42,12 @@ for i in tempsystemlist:
                 from sqlalchemy.engine import create_engine
                 from modules import check_dbconnect_success
                 
-                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(dicConfig.get("postgres_user"),dicConfig.get("postgres_pwd"),dicConfig.get("postgres_ip"),dicConfig.get("postgres_port"),dbName)
+                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+                                    config["DBPOSTGRESUser"],
+                                    config["DBPOSTGRESPassword"],
+                                    config["DBPOSTGRESIp"],
+                                    config["DBPOSTGRESPort"],
+                                    dbName)
                 print("@@@@@@dbUri@@@@@@@@")
                 print(dbUri)
                 dbEngine = create_engine(dbUri,encoding='utf-8')

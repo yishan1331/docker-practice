@@ -21,18 +21,14 @@ Description: Common modules
 #=======================================================
 #{{{
 import sys
-import traceback, re, time, json
-from datetime import datetime, date, timedelta
+import re, time
+from datetime import datetime
 
 #Yishan 11062019 引入Counter來找出list
-from collections import Counter, Mapping, Iterable
-from time import strftime 
-from copy import deepcopy
-from functools import wraps #Yishan@011112020 add for Decorators
+from collections import Mapping, Iterable
 
 from sqlalchemy import *
 from sqlalchemy.sql import func
-from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.engine import create_engine
 
@@ -43,6 +39,8 @@ warnings.filterwarnings('ignore', category=sa_exc.SAWarning)
 
 #Yishan 11102020 加入redis in-memory db to store Validity period data
 import redis
+
+from app import *
 #}}}
 
 #=======================================================
@@ -101,7 +99,7 @@ def check_dbconnect_success(sess, system):
 # Date: 06092020@Yishan
 #=======================================================
 # {{{ def retrieve_database_exist(dbName)
-def retrieve_database_exist(system, dicConfig, dbName="", forRawData="mysql"):
+def retrieve_database_exist(system, dbName="", forRawData="mysql"):
     """
     檢查資料庫是否存在
 
@@ -116,7 +114,7 @@ def retrieve_database_exist(system, dicConfig, dbName="", forRawData="mysql"):
     existed = True
     err_msg = "ok"
     try:
-        DbSession,metadata,engine = getDbSessionType(dicConfig, dbName=dbName, forRawData=forRawData, system=system)
+        DbSession,metadata,engine = getDbSessionType(dbName=dbName, forRawData=forRawData, system=system)
         if DbSession is None:
             existed = False
             err_msg = engine
@@ -135,7 +133,7 @@ def retrieve_database_exist(system, dicConfig, dbName="", forRawData="mysql"):
 # Date: 06092020@Yishan
 #=======================================================
 # {{{ def create_database(dbName)
-def create_database(system, dbName, dicConfig, forRawData="postgres"):
+def create_database(system, dbName, forRawData="postgres"):
     status = True
     if forRawData != "postgres":
         return "Only PostgreSQL DataBase can create new database"
@@ -146,7 +144,7 @@ def create_database(system, dbName, dicConfig, forRawData="postgres"):
         else:
             default_dbName = dbName
             
-        DbSession,_,engine = getDbSessionType(dicConfig, dbName=default_dbName,forRawData=forRawData,system=system)
+        DbSession,_,engine = getDbSessionType(dbName=default_dbName,forRawData=forRawData,system=system)
         print("~~~~~~~~~~")
         print(DbSession)
         print(engine)
@@ -280,7 +278,7 @@ def checkexisted_api_count_record_table(sessRaw, metaRaw, dbName, tbName_count, 
 # DB Session Generation process  
 #=======================================================
 # {{{ def getDbSessionType()
-def getDbSessionType(dicConfig, dbName="", forRawData="mysql", system=None, driver="pyodbc", echo=False):
+def getDbSessionType(dbName="", forRawData="mysql", system=None, driver="pyodbc", echo=False):
     if system is None: return None,None,"No system"
     #POSTGRES
     PostgresqlUser = "DBPOSTGRESUser"
@@ -294,16 +292,21 @@ def getDbSessionType(dicConfig, dbName="", forRawData="mysql", system=None, driv
     RedisPassword = "DBREDISPassword"
 
     if forRawData == 'postgres':
-        dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(dicConfig.get("postgres_user"),dicConfig.get("postgres_pwd"),dicConfig.get("postgres_ip"),dicConfig.get("postgres_port"),dbName)
+        dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+                            config.get(PostgresqlUser),
+                            config.get(PostgresqlPassword),
+                            config.get(PostgresqlIP),
+                            config.get(PostgresqlPort),
+                            dbName)
 
     elif forRawData == 'redis':
         try:
             #採用此方式connect無需再特地disconnect，會自動disconnect 
             #not need to do -> dbRedis.connection_pool.disconnect()
-            POOL = redis.ConnectionPool(host="{}".format(dicConfig.get("redis_ip")),\
-                                        port="{}".format(dicConfig.get("redis_port")),\
-                                        db=dbName,\
-                                        password="{}".format(dicConfig.get("redis_pwd")))
+            POOL = redis.ConnectionPool(host=config.get(RedisIp),
+                                        port=config.get(RedisPort),
+                                        db=dbName,
+                                        password=config.get(RedisPassword))
             dbRedis = redis.Redis(connection_pool=POOL)
             return dbRedis,None,None
         except Exception as e:

@@ -1,3 +1,5 @@
+# How to use
+##### 1. 需先設定連接資料庫的config檔(services/flask/var/www/spdpaas/config/constants.conf)
 1. copy this folder to target server
 2. into this folder
 3. docker-compose up -d

@@ -1,48 +1,22 @@
 #-*- coding: utf-8 -*-                                                                                                        
-import os
 import redis
-import time
-import ConfigParser
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
-def _readConfig():
-    print "#######_readConfig########"
-    dicConfig = {}
-    try:
-        CONFPATH = "/var/app/config.conf"
+from config import config
 
-        FILECONFIG = ConfigParser.ConfigParser()
-        FILECONFIG.read(CONFPATH)
-
-        dicConfig = {
-            'celery_broker_ip': FILECONFIG.get('CeleryBroker', 'ip'),
-            'celery_broker_port': FILECONFIG.get('CeleryBroker', 'port'),
-            'celery_broker_password': FILECONFIG.get('CeleryBroker', 'password'),
-            'celery_broker_db': FILECONFIG.get('CeleryBroker', 'db'),
-            "DBPOSTGRESIp":FILECONFIG.get('DataBasePostgresql', 'ip'),
-            "DBPOSTGRESPort":FILECONFIG.get('DataBasePostgresql', 'port'),
-            "DBPOSTGRESUser":FILECONFIG.get('DataBasePostgresql', 'user'),
-            "DBPOSTGRESPassword":FILECONFIG.get('DataBasePostgresql', 'password')
-        }
-
-        print "~~~~dicConfig~~~~~"
-        print dicConfig
-
-    except Exception as e:
-        print "~~~~_readConfig error~~~~"
-        print e
-    finally:
-        return dicConfig
-
-dicConfig = _readConfig()
-
-POOL = redis.ConnectionPool(host=dicConfig.get("celery_broker_ip"), port=dicConfig.get("celery_broker_port"), db=dicConfig.get("celery_broker_db"),password=dicConfig.get("celery_broker_password"))
+POOL = redis.ConnectionPool(
+    host=config["DBREDISIp"],
+    port=config["DBREDISPort"],
+    db=config["DBREDISDb"],
+    password=config["DBREDISPassword"]
+)
 
 dbRedis = redis.Redis(connection_pool=POOL)
 
 import globalvar
 tempsystemlist = globalvar.SYSTEMLIST[globalvar.SERVERIP]
 tempsystemlist.append("PaaS")
+print(tempsystemlist)
 
 for i in tempsystemlist:
     yesterday = datetime.today() + timedelta(-1)
@@ -68,7 +42,12 @@ for i in tempsystemlist:
                 from sqlalchemy.engine import create_engine
                 from modules import check_dbconnect_success
                 
-                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(dicConfig.get("DBPOSTGRESUser"),dicConfig.get("DBPOSTGRESPassword"),dicConfig.get("DBPOSTGRESIp"),dicConfig.get("DBPOSTGRESPort"),dbName)
+                dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+                                    config["DBPOSTGRESUser"],
+                                    config["DBPOSTGRESPassword"],
+                                    config["DBPOSTGRESIp"],
+                                    config["DBPOSTGRESPort"],
+                                    dbName)
                 print("@@@@@@dbUri@@@@@@@@")
                 print(dbUri)
                 dbEngine = create_engine(dbUri,encoding='utf-8')

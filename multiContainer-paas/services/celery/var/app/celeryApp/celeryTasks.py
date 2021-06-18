@@ -18,7 +18,6 @@ Description: for celery tasks
 #{{{
 import time
 from datetime import datetime
-import subprocess #Yishan 05212020 subprocess 取代 os.popen
 from sqlalchemy import Table
 import resource
 import redis
@@ -72,11 +71,12 @@ class DBTask(Task):
                 from modules import check_dbconnect_success
                 
                 dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(\
-                            config["DBPOSTGRESUser"],\
-                            config["DBPOSTGRESPassword"],\
-                            config["DBPOSTGRESIp"],\
-                            config["DBPOSTGRESPort"],\
-                            "sapidoapicount_"+self._system.lower())
+                            config["DBPOSTGRESUser"],
+                            config["DBPOSTGRESPassword"],
+                            config["DBPOSTGRESIp"],
+                            config["DBPOSTGRESPort"],
+                            "sapidoapicount_"+self._system.lower()
+                        )
                 logger.debug("~~~~dbUri~~~~")
                 logger.debug(dbUri)
                 _dbEngine = create_engine(dbUri,encoding='utf-8')
@@ -98,7 +98,6 @@ class DBTask(Task):
 
 def print_mem():
     logger.debug('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    # print('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
 @app.task(base=DBTask, bind=True)
 def celery_post_api_count_record(self, threaddata):
@@ -135,7 +134,7 @@ def celery_post_api_count_record(self, threaddata):
     # print "&&&&&&&&&&&&&&&&&&&&&&&&"
     if not sessRaw is None:
         try:
-            dbRedis,_,_= getDbSessionType(system=system,dbName=15,forRawData="redis")
+            dbRedis,_,_= getDbSessionType(system=system,dbName=config["DBREDISDb"],forRawData="redis")
             if dbRedis is None:
                 return
 

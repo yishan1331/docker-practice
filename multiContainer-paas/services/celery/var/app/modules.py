@@ -21,18 +21,13 @@ Description: Common modules
 #=======================================================
 #{{{
 import sys
-import traceback, re, time, json
-from datetime import datetime, date, timedelta
-
+import re, time
+from datetime import datetime
 #Yishan 11062019 引入Counter來找出list
-from collections import Counter, Mapping, Iterable
-from time import strftime 
-from copy import deepcopy
-from functools import wraps #Yishan@011112020 add for Decorators
+from collections import Mapping, Iterable
 
 from sqlalchemy import *
 from sqlalchemy.sql import func
-from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.engine import create_engine
 
@@ -296,20 +291,20 @@ def getDbSessionType(dbName="", forRawData="mysql", system=None, driver="pyodbc"
     RedisPassword = "DBREDISPassword"
 
     if forRawData == 'postgres':
-        dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(\
-                                config.get(PostgresqlUser),\
-                                config.get(PostgresqlPassword),\
-                                config.get(PostgresqlIP),\
-                                config.get(PostgresqlPort),\
+        dbUri = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+                                config.get(PostgresqlUser),
+                                config.get(PostgresqlPassword),
+                                config.get(PostgresqlIP),
+                                config.get(PostgresqlPort),
                                 dbName)
 
     elif forRawData == 'redis':
         try:
             #採用此方式connect無需再特地disconnect，會自動disconnect 
             #not need to do -> dbRedis.connection_pool.disconnect()
-            POOL = redis.ConnectionPool(host=config.get(RedisIp),\
-                                        port=config.get(RedisPort),\
-                                        db=dbName,\
+            POOL = redis.ConnectionPool(host=config.get(RedisIp),
+                                        port=config.get(RedisPort),
+                                        db=dbName,
                                         password=config.get(RedisPassword))
             dbRedis = redis.Redis(connection_pool=POOL)
             return dbRedis,None,None

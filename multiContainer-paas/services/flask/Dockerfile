@@ -8,7 +8,7 @@ COPY ./init /init
 COPY var /var
 
 RUN apt-get -y update \
-    && apt-get install -y vim-gtk less curl cron openssl rsyslog logrotate
+    && apt-get install -y vim-gtk less curl cron openssl rsyslog logrotate mailutils
 
 # COPY ./config /root/.ssh/
 # RUN ssh-keygen -q -t rsa -N '' -f  /root/.ssh/id_rsa

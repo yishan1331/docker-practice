@@ -151,6 +151,8 @@ services:
             UWSGI_PORT: ${FLASK_PORT}
             # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
+            SERVER_NAME: ${SERVER_NAME}
+            SERVER_IP: ${SERVER_IP}
         depends_on:
             - redis
             - postgres
@@ -179,7 +181,8 @@ services:
         #     - ${REDIS_HOST_PORT}
         volumes:
             - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
-            - ${PWD}/${DATA_DIR}/redis:/data/:rw
+            - ${PWD}/${DATA_DIR}/redis/dump:/data/:rw
+            - ${PWD}/${DATA_DIR}/redis/log:/var/log/redis/:rw
         restart: always
         entrypoint: ["redis-server", "/etc/redis.conf"]
         environment:

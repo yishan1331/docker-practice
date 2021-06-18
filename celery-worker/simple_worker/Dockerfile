@@ -3,10 +3,10 @@ LABEL maintainer="yishanjob13@gmail.com"
 
 # #設定中文語系 https://ubuntuqa.com/zh-tw/article/9876.html
 RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
-    && locale-gen "en_US.UTF-8"
-ENV LANG=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8
+    && locale-gen "C.UTF-8"
+ENV LANG=C.UTF-8
+    # LANGUAGE=C:en \
+    # LC_ALL=C.UTF-8
 
 #設定時區 https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes/683651
 ENV TZ=Asia/Taipei

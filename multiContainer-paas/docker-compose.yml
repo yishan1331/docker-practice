@@ -11,25 +11,19 @@ services:
                 TZ: "$TZ"
         container_name: php
         volumes:
-            - ${PWD}/${SERVICES_DIR}/${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
+            - ${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
             # php-fpm 的配置
-            - ${PWD}/${SERVICES_DIR}/${PHP_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/zz-docker.conf:rw
+            - ${PHP_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/zz-docker.conf:rw
             # 挂载宿主机 socket 目录，因为 nginx 服务也需要访问
-            - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
-            - ${PWD}/${DATA_DIR}/${PHP_LOG_DIR}:/var/log/php
-            # # 因flask_app會執行php程式，故須掛載進data
-            # - php-exe:/usr/local/bin
-
+            - ${PHP_FPM_SOCK_DIR}:/run/php/
+            - ${PHP_LOG_DIR}:/var/log/php
             # 需將有包含php的html一併掛載進php-fpm service內才能順利抓取php file
             - api-html:/var/www/html/API:rw
             - web-html:/var/www/html/WEB:rw
-
             - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
-        # entrypoint: "./crons.sh"
         restart: always
         environment:
             TZ: "$TZ"
-            # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
 
     nginx:
@@ -40,29 +34,28 @@ services:
         # image: nginx
         container_name: nginx_web
         ports:
-            - ${NGINX_HTTP_HOST_PORT}:80
-            - ${NGINX_HTTPS_HOST_PORT}:443
+            - ${NGINX_WEB_HTTP_HOST_PORT}:80
+            - ${NGINX_WEB_HTTPS_HOST_PORT}:443
         volumes:
-            - ${PWD}/${SERVICES_DIR}/${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
-            - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
+            - ${NGINX_WEB_CONFD_DIR}:/etc/nginx/conf.d/:rw
+            - ${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:rw
 
             - web-html:/var/www/html/WEB:rw
 
-            - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
+            - ${NGINX_LOG_DIR}/web:/var/log/nginx/:rw
 
             # link php-fpm sock
-            - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
+            - ${PHP_FPM_SOCK_DIR}:/run/php/
 
             # - ${DATA_DIR}/certbot/conf:/etc/letsencrypt
             # - ${DATA_DIR}/certbot/var:/var/lib/letsencrypt
-            - ${PWD}/${SERVICES_DIR}/${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
+            - ${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
 
             # - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:ro
             # - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:ro
         restart: always
         environment:
             TZ: "$TZ"
-            # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
     
     nginx_api:
@@ -75,23 +68,22 @@ services:
         ports:
             - ${NGINX_UWASI_HOST_PORT}:3687
         volumes:
-            - ${PWD}/${SERVICES_DIR}/${NGINX_API_CONFD_DIR}:/etc/nginx/templates
-            # - ${PWD}/${SERVICES_DIR}/${NGINX_API_CONFD_DIR}:/etc/nginx/conf.d/:rw
-            - ${PWD}/${SERVICES_DIR}/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
-            - ${PWD}/${DATA_DIR}/${NGINX_LOG_DIR}/api:/var/log/nginx/:rw
+            - ${NGINX_API_CONFD_DIR}:/etc/nginx/templates
+            # - ${NGINX_API_CONFD_DIR}:/etc/nginx/conf.d/:rw
+            - ${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
+            - ${NGINX_LOG_DIR}/api:/var/log/nginx/:rw
 
             # - ${DATA_DIR}/certbot/conf:/etc/letsencrypt
             # - ${DATA_DIR}/certbot/var:/var/lib/letsencrypt
-            - ${PWD}/${SERVICES_DIR}/${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
+            - ${NGINX_SSL_CERTIFICATE_DIR}:/etc/nginx/ssl:rw
             
-            # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/run/uwsgi/
-            # - paas-uwsgi-sock:/run/uwsgi/
+            # ${UWSGI_SOCK_DIR}:/run/uwsgi/
 
             # - ${NGINX_FASTCGI_PHP_CONF}:/etc/nginx/fastcgi-php.conf:ro
             # - ${NGINX_FASTCGI_PARAMS}:/etc/nginx/fastcgi_params:ro
 
             # link php-fpm sock
-            - ${PWD}/${DATA_DIR}/php/php_fpm/sock:/run/php/
+            - ${PHP_FPM_SOCK_DIR}:/run/php/
 
             - api-html:/var/www/html/API:rw
             - paas-dashboard:/var/www/spdpaas/src/dashboard:rw
@@ -99,9 +91,7 @@ services:
         restart: always
         environment:
             TZ: "$TZ"
-            # - UWSGI_PORT=${FLASK_PORT}
-            UWSGI_PORT: ${FLASK_PORT}
-            # LC_ALL: en_US.UTF-8
+            UWSGI_PORT: ${NGINX_UWASI_HOST_PORT}
             LANG: C.UTF-8
         command:
             [
@@ -121,19 +111,14 @@ services:
                 TZ: "$TZ"
         container_name: flask_app
         # user: www-data
-        # ports:
-        #     - 3688:3688
         expose:
-            - ${FLASK_PORT}
+            - ${NGINX_UWASI_HOST_PORT}
         volumes:
             - ./wait-for-it.sh:/wait-for-it.sh
-            # - ${PWD}/${DATA_DIR}/${UWSGI_LOG_DIR}:/var/log/uwsgi/:rw
-            # - ${PWD}/${DATA_DIR}/${FLASK_LOG_DIR}:/var/www/spdpaas/log/:ro
+            # - ${UWSGI_LOG_DIR}:/var/log/uwsgi/:rw
+            # - ${FLASK_LOG_DIR}:/var/www/spdpaas/log/:ro
 
-            # - php-exe:/usr/local/bin/php/
-
-            # - ${PWD}/${DATA_DIR}/${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
-            # - paas-uwsgi-sock:/var/www/spdpaas/run/
+            # - ${UWSGI_SOCK_DIR}:/var/www/spdpaas/run/
             - paas-data:/var/www/spdpaas/src/
             - api-html:/var/www/html/API:rw
             - paas-dashboard:/var/www/spdpaas/dashboard:rw
@@ -148,11 +133,9 @@ services:
         restart: always
         environment:
             TZ: "$TZ"
-            UWSGI_PORT: ${FLASK_PORT}
-            # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
-            SERVER_NAME: ${SERVER_NAME}
-            SERVER_IP: ${SERVER_IP}
+        env_file:
+            - .env
         depends_on:
             - redis
             - postgres
@@ -173,28 +156,31 @@ services:
     #         - ${DATA_DIR}/certbot/data:/var/www/certbot
 
     redis:
+        # build:
+        #     context: ${SERVICES_DIR}/redis
+        #     args:
+        #         REDIS_REQUIREPASS: ${REDIS_REQUIREPASS}
+        #         TZ: "$TZ"
         image: redis
         container_name: redis
         ports:
             - ${REDIS_HOST_PORT}:6379
-        # expose:
-        #     - ${REDIS_HOST_PORT}
         volumes:
             - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
             - ${PWD}/${DATA_DIR}/redis/dump:/data/:rw
             - ${PWD}/${DATA_DIR}/redis/log:/var/log/redis/:rw
         restart: always
-        entrypoint: ["redis-server", "/etc/redis.conf"]
+        # command: bash -c '[ "$$REDIS_PASS_FILE" ] &&
+        # ( cat "$$REDIS_PASS_FILE" | xargs -0 redis-server --requirepass ) || redis-server'
+        command: ["redis-server", "/etc/redis.conf", "--requirepass", "${REDIS_REQUIREPASS}"]
+        # entrypoint: ["redis-server", "/etc/redis.conf"]
         environment:
             TZ: "$TZ"
-            # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
 
     postgres:
         image: postgres
         container_name: postgres
-        # ports:
-            # - ${POSTGRES_HOST_PORT}:5432
         expose:
             - ${POSTGRES_HOST_PORT}
         volumes:
@@ -207,6 +193,8 @@ services:
             POSTGRES_USER: ${POSTGRES_USER}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_PAAS_USER: ${POSTGRES_PAAS_USER}
+            POSTGRES_PAAS_PASSWORD: ${POSTGRES_PAAS_PASSWORD}
             TZ: "$TZ"
             # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
@@ -225,10 +213,7 @@ services:
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-            # MYSQL_USER: ${MYSQL_USER}
-            # MYSQL_PASSWORD: ${MYSQL_PASSWORD}
             TZ: "$TZ"
-            # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
 
     celeryworker:
@@ -239,7 +224,7 @@ services:
         container_name: celeryworker
         volumes:
             # - ./wait-for-it.sh:/wait-for-it.sh
-            - ${PWD}/${DATA_DIR}/${CELERY_LOG_DIR}:/var/log/celery/:rw
+            - ${CELERY_LOG_DIR}:/var/log/celery/:rw
             - ${PWD}/${SERVICES_DIR}/flask/var/www/spdpaas/src/app/globalvar.py:/var/app/globalvar.py:ro
             - ${PWD}/${SERVICES_DIR}/flask/var/www/spdpaas/config/constants.conf:/var/app/config.conf:ro
         # command:
@@ -251,8 +236,9 @@ services:
         restart: always
         environment:
             TZ: "$TZ"
-            # LC_ALL: en_US.UTF-8
             LANG: C.UTF-8
+        env_file:
+            - .env
         depends_on:
             - redis
             - postgres
@@ -290,5 +276,3 @@ volumes:
         name: api-html
     paas-dashboard:
         name: paas-dashboard
-    # php-exe:
-    #     name: php-exe

@@ -1,8 +1,9 @@
+import os
 import ConfigParser
 
 CONFPATH = "/var/app/config.conf"
 
-CONFIG = ConfigParser.ConfigParser()
+CONFIG = ConfigParser.ConfigParser(os.environ)
 CONFIG.read(CONFPATH)
 
 config = {

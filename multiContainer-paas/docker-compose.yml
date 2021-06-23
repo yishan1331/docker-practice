@@ -132,6 +132,7 @@ services:
             - net.core.somaxconn=32678
         restart: always
         environment:
+            UWSGI_PORT: ${NGINX_UWASI_HOST_PORT}
             TZ: "$TZ"
             LANG: C.UTF-8
         env_file:
@@ -156,24 +157,17 @@ services:
     #         - ${DATA_DIR}/certbot/data:/var/www/certbot
 
     redis:
-        # build:
-        #     context: ${SERVICES_DIR}/redis
-        #     args:
-        #         REDIS_REQUIREPASS: ${REDIS_REQUIREPASS}
-        #         TZ: "$TZ"
         image: redis
         container_name: redis
         ports:
             - ${REDIS_HOST_PORT}:6379
         volumes:
             - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
-            - ${PWD}/${DATA_DIR}/redis/dump:/data/:rw
-            - ${PWD}/${DATA_DIR}/redis/log:/var/log/redis/:rw
+            - ${PWD}/${DATA_DIR}/redis/dump:/data/dump/:rw
+            - ${PWD}/${DATA_DIR}/redis/log:/data/log/:rw
         restart: always
-        # command: bash -c '[ "$$REDIS_PASS_FILE" ] &&
-        # ( cat "$$REDIS_PASS_FILE" | xargs -0 redis-server --requirepass ) || redis-server'
+        #https://github.com/docker-library/redis/issues/46
         command: ["redis-server", "/etc/redis.conf", "--requirepass", "${REDIS_REQUIREPASS}"]
-        # entrypoint: ["redis-server", "/etc/redis.conf"]
         environment:
             TZ: "$TZ"
             LANG: C.UTF-8

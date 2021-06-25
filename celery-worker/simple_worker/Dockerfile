@@ -45,6 +45,7 @@ RUN pip install -r /requirements.txt
 # ENV CELERY_BROKER_URL amqp://guest@rabbit
 RUN chown root:crontab /var/spool/cron/crontabs/root
 RUN chmod +x /var/app/start.sh
+RUN chmod +x /var/app/use_env_run_python.sh
 
 WORKDIR /var/app
 

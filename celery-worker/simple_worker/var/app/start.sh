@@ -13,6 +13,7 @@ crontab /var/spool/cron/crontabs/root
 scriptPath=$(dirname "$(readlink -f "$0")")
 printenv | sed 's/^\(.*\)$/export \1/g' > ${scriptPath}/.env.sh
 chmod +x ${scriptPath}/.env.sh
+#https://roboslang.blog/post/2017-12-06-cron-docker/
 
 celery -A celeryWorker multi start 20 --pidfile=/run/celery/%n%I.pid -l=${CELERYLOG} --logfile=/var/log/celery/%n%I.log -Q L-queue1 -c 1000 -P gevent -O fair
 echo "start"

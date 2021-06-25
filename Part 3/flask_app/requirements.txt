@@ -1,5 +1,0 @@
-Flask
-celery[mongodb]
-boto3
-pymongo
-

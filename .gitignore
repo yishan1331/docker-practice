@@ -6,7 +6,7 @@ dnmp-master/
 Part 3/
 multiContainer-paas/data
 multiContainer-paas/services/flask/var/www/spdpaas/src
-**/initdb.d
-*.sql
+**/initdb.d/*-cus.sql
+#*.sql
 **/log
 *.zip

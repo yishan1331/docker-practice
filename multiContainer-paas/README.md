@@ -1,8 +1,8 @@
 # How to use
 ##### 1. 需先設定連接三種資料庫的帳密&celery broker&寄送Eamil的設定(./.env)
 * Mariadb 
-    > 帳號：MYSQL_USER
-    > 密碼：MYSQL_PASSWORD
+    > 帳號：MYSQL_PAAS_USER
+    > 密碼：MYSQL_PAAS_PASSWORD
 * PostgreSQL 
     > 帳號：POSTGRES_PAAS_USER
     > 密碼：POSTGRES_PAAS_PASSWORD

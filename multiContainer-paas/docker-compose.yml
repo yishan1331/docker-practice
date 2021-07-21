@@ -163,8 +163,8 @@ services:
             - ${REDIS_HOST_PORT}:6379
         volumes:
             - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
-            - ${PWD}/${DATA_DIR}/redis/dump:/data/dump/:rw
-            - ${PWD}/${DATA_DIR}/redis/log:/data/log/:rw
+            - ${DATA_DIR}/redis/dump:/data/dump/:rw
+            - ${DATA_DIR}/redis/log:/data/log/:rw
         restart: always
         #https://github.com/docker-library/redis/issues/46
         command: ["redis-server", "/etc/redis.conf", "--requirepass", "${REDIS_REQUIREPASS}"]
@@ -180,8 +180,8 @@ services:
         volumes:
             - ${POSTGRES_CONF_FILE}:/etc/postgresql/postgresql.conf:ro
             - ${POSTGRES_HBA_CONF_FILE}:/etc/postgresql/pg_hba.conf:ro
-            - ${PWD}/${SERVICES_DIR}/postgres/initdb.d:/docker-entrypoint-initdb.d
-            - ${PWD}/${DATA_DIR}/postgres:/var/lib/postgresql/data:rw
+            - ${SERVICES_DIR}/postgres/initdb.d:/docker-entrypoint-initdb.d
+            - ${DATA_DIR}/postgres:/var/lib/postgresql/data:rw
         restart: always
         environment:
             POSTGRES_USER: ${POSTGRES_USER}
@@ -202,25 +202,27 @@ services:
             - ${MYSQL_HOST_PORT}
         volumes:
             - ${MYSQL_CONF_FILE}:/etc/mysql/conf.d/:ro
-            - ${PWD}/${DATA_DIR}/mysql:/var/lib/mysql/:rw
-            - ${PWD}/${SERVICES_DIR}/mysql/initdb.d:/docker-entrypoint-initdb.d
+            - ${DATA_DIR}/mysql:/var/lib/mysql/:rw
+            - ${SERVICES_DIR}/mysql/initdb.d:/docker-entrypoint-initdb.d
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_PAAS_USER: ${MYSQL_PAAS_USER}
+            MYSQL_PAAS_PASSWORD: ${MYSQL_PAAS_PASSWORD}
             TZ: "$TZ"
             LANG: C.UTF-8
 
     celeryworker:
         build:
-            context: ${PWD}/${SERVICES_DIR}/celery
+            context: ${SERVICES_DIR}/celery
             args:
                 TZ: "$TZ"
         container_name: celeryworker
         volumes:
             # - ./wait-for-it.sh:/wait-for-it.sh
             - ${CELERY_LOG_DIR}:/var/log/celery/:rw
-            - ${PWD}/${SERVICES_DIR}/flask/var/www/spdpaas/src/app/globalvar.py:/var/app/globalvar.py:ro
-            - ${PWD}/${SERVICES_DIR}/flask/var/www/spdpaas/config/constants.conf:/var/app/config.conf:ro
+            - ${SERVICES_DIR}/flask/var/www/spdpaas/src/app/globalvar.py:/var/app/globalvar.py:ro
+            - ${SERVICES_DIR}/flask/var/www/spdpaas/config/constants.conf:/var/app/config.conf:ro
         # command:
         #     [
         #         "/bin/sh",
